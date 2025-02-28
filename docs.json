@@ -26,6 +26,12 @@
             ]
           },
           {
+            "group": "Open Times Endpoints",
+            "pages": [
+              "api-reference/open_times/search"
+            ]
+          },
+          {
             "group": "Endpoint Examples",
             "pages": [
               "api-reference/endpoint/get",
