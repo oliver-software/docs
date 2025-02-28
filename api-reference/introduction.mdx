@@ -1,33 +1,24 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'An introduction to the Oliver Software veterinary API'
 ---
 
 <Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
+  This is a developer preview of our upcoming API. All endpoints are subject to change without notice until the API is released.
 </Note>
-
-## Welcome
-
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints are authenticated using JWT Bearer tokens in the Authorization header.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+### Required Headers
+
+In addition to the Authorization header, all requests must include the following headers:
+
+- `Content-Type: application/json`
+- `Accept: application/json`
+- `X-Client-Id: <your-client-id>`
+    - Required header that identifies which PIMS instance the request is intended for.
+    - This unique identifier is provided by Oliver during the onboarding process.
+    - Contact [engineering@getoliver.com](mailto:engineering@getoliver.com) if you need to obtain or verify your Client ID.
+
