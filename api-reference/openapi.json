@@ -24,7 +24,7 @@
         "security": [],
         "description": "Authenticate with the API",
         "requestBody": {
-          "description": "Sign in credentials",
+          "description": "Sign in credentials. You may obtain your partner authentication credentials from engineering@getoliver.com",
           "content": {
             "application/json": {
               "schema": {
