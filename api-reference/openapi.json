@@ -79,7 +79,7 @@
     },
     "/services/core/v1/time_slots/open_times": {
       "post": {
-        "description": "Returns open times for a given provider, appointment type, etc.",
+        "description": "Search for open times for a given provider, appointment type, etc. Can be used to find open times in the future or past.",
         "requestBody": {
           "description": "Open times request",
           "content": {
@@ -308,25 +308,25 @@
       "OpenTimesRequest": {
         "type": "object",
         "required": [
-          "date",
+          "exact_start_date",
           "appointment_type_id",
           "provider_ids"
         ],
         "properties": {
-          "date": {
+          "exact_start_date": {
             "type": "string",
             "format": "date",
-            "description": "The current date in ISO 8601 format",
-            "example": "2025-01-01T00:00:00Z"
+            "description": "The start date/time of the search in ISO 8601 format. Can be a past, present, or future timestamp.",
+            "example": "2025-01-01T07:00:00Z"
           },
           "days_to_check": {
             "type": "integer",
-            "description": "The number of days out to check at a time for open times. A smaller number may return results faster, but may not return available open times if none are available in the window specified.",
+            "description": "The number of days from exact_start_date to check at a time for open times. A smaller number may return results faster because the API will first return results if there are open times available in the window specified.",
             "default": 30
           },
           "max_attempts": {
             "type": "integer",
-            "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from now and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will effectively check 30 days for open times, but will return the first result as soon as it finds open times.",
+            "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from exact_start_date and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will effectively check 30 days for open times, but will return the first result as soon as it finds open times.",
             "default": 4
           },
           "appointment_type_id": {
@@ -375,69 +375,69 @@
           "date": {
             "type": "string",
             "format": "date",
-            "example": "MM/DD/YYYY"
+            "example": "MM/DD/YYYY",
+            "description": "The date of this result in MM/DD/YYYY format"
           },
           "start_date": {
             "type": "string",
             "format": "date",
-            "example": "2025-01-01T00:00:00-06:00"
+            "example": "2025-01-01T00:00:00-06:00",
+            "description": "The date of this result in ISO 8601 format"
           },
           "available": {
             "type": "boolean",
-            "example": true
+            "example": true,
+            "description": "Whether this result has open times"
           },
           "times": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TimeSlot"
-            }
+            },
+            "description": "An array of open times for this date"
           }
         }
       },
       "TimeSlot": {
         "type": "object",
         "required": [
-          "dateTime",
           "internal_start",
           "internal_end",
           "label",
-          "enabled",
           "provider_id",
           "value"
         ],
         "properties": {
-          "dateTime": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-01-01T16:00:00-06:00"
-          },
           "internal_start": {
             "type": "string",
             "format": "time",
-            "example": "2025-01-01T16:00:00-06:00"
+            "description": "The start time of this result formatted as 2025-01-01T16:00:00-06:00"
           },
           "internal_end": {
             "type": "string",
             "format": "time",
-            "example": "2025-01-01T16:20:00-06:00"
-          },
-          "label": {
-            "type": "string",
-            "example": "4:00 pm"
-          },
-          "enabled": {
-            "type": "boolean",
-            "example": true
+            "description": "The end time of this result formatted as 2025-01-01T16:20:00-06:00 (20 minutes after the start time)"
           },
           "provider_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The ID of the provider that this result is for"
           },
           "room_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The ID of the room that this result is for, if applicable"
           },
           "value": {
             "type": "string",
-            "example": "16:00"
+            "description": "The time value of this result formatted like 16:00"
+          },
+          "label": {
+            "type": "string",
+            "description": "The label of this result formatted like 4:00 pm"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether this result is enabled"
           }
         }
       },
