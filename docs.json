@@ -32,12 +32,39 @@
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Appointments Endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/appointments/create"
+            ]
+          },
+          {
+            "group": "Appointment Types Endpoints",
+            "pages": [
+              "api-reference/appointment_types/index"
+            ]
+          },
+          {
+            "group": "Clients Endpoints",
+            "pages": [
+              "api-reference/clients/index"
+            ]
+          },
+          {
+            "group": "Patients Endpoints",
+            "pages": [
+              "api-reference/patients/index"
+            ]
+          },
+          {
+            "group": "Providers Endpoints",
+            "pages": [
+              "api-reference/providers/index"
+            ]
+          },
+          {
+            "group": "Rooms Endpoints",
+            "pages": [
+              "api-reference/rooms/index"
             ]
           }
         ]

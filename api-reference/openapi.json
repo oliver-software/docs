@@ -104,105 +104,32 @@
         }
       }
     },
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/services/core/v1/appointments": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Create an appointment",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Appointment to create",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/CreateAppointmentRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Appointment created",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/CreateAppointmentResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -441,41 +368,83 @@
           }
         }
       },
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "CreateAppointmentRequest": {
         "type": "object",
+        "required": [
+          "date",
+          "end_date",
+          "provider_id",
+          "appointment_type_id",
+          "patient_id",
+          "client_id"
+        ],
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The start date/time of the appointment in ISO 8601 format"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The end date/time of the appointment in ISO 8601 format"
+          },
+          "provider_id": {
+            "type": "string",
+            "description": "The ID of the provider that this appointment is for"
+          },
+          "appointment_type_id": {
+            "type": "string",
+            "description": "The ID of the appointment type that this appointment is for"
+          },
+          "note": {
+            "type": "string",
+            "description": "A note for the appointment"
+          },
+          "patient_id": {
+            "type": "string",
+            "description": "The ID of the patient that this appointment is for"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The ID of the client that this appointment is for"
+          },
+          "room_id": {
+            "type": "string",
+            "description": "The ID of the room that this appointment is for"
+          },
+          "referral_source": {
+            "type": "string",
+            "description": "The partner's referral source for this appointment. e.g. 'Google', 'Facebook', 'Website', etc."
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "CreateAppointmentResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
           },
-          {
+          "data": {
+            "type": "object",
             "required": [
               "id"
             ],
-            "type": "object",
             "properties": {
               "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+                "type": "string",
+                "description": "The ID of the appointment that was created"
               }
             }
+          },
+          "message": {
+            "type": "string"
           }
-        ]
+        }
       },
       "Error": {
         "required": [
