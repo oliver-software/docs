@@ -3,5 +3,6 @@ title: 'List Clients'
 openapi: 'GET /services/core/v1/clients'
 ---
 
-
-
+<Warning>
+  At least one of name, email, or phone must be provided as a query parameter. Max 100 clients will be returned per request, subject to rate limiting.
+</Warning>

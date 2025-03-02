@@ -401,7 +401,7 @@
     },
     "/services/core/v1/clients": {
       "get": {
-        "description": "List clients. At least one of name, email, or phone must be provided.",
+        "description": "List clients using filters",
         "parameters": [
           {
             "name": "name",
@@ -677,8 +677,17 @@
     },
     "/services/core/v1/patients": {
       "get": {
-        "description": "List patients",
+        "description": "List patients for a specific client. Requires client_id and optionally filters by name.",
         "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "The ID of the client whose patients to list",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "name",
             "in": "query",
@@ -1173,6 +1182,10 @@
           "name": {
             "type": "string",
             "description": "The name of the provider"
+          },
+          "default_room_id": {
+            "type": "string",
+            "description": "The ID of the default scheduling room for this provider, if applicable."
           }
         }
       },
@@ -1180,8 +1193,7 @@
         "type": "object",
         "required": [
           "id",
-          "name",
-          "email"
+          "name"
         ],
         "properties": {
           "id": {
@@ -1199,6 +1211,13 @@
           "phone": {
             "type": "string",
             "description": "The phone number of the client"
+          },
+          "patients": {
+            "type": "array",
+            "description": "List of patients associated with this client",
+            "items": {
+              "$ref": "#/components/schemas/Patient"
+            }
           }
         }
       },
