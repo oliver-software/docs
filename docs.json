@@ -40,7 +40,8 @@
           {
             "group": "Appointment Types Endpoints",
             "pages": [
-              "api-reference/appointment_types/index"
+              "api-reference/appointment_types/index",
+              "api-reference/appointment_types/show"
             ]
           },
           {

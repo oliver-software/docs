@@ -133,7 +133,136 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/SignInError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/appointment_types": {
+      "get": {
+        "description": "List appointment types",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optionally filter appointment types by name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of appointment types found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AppointmentType"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/appointment_types/{id}": {
+      "get": {
+        "description": "Get an appointment type by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the appointment type to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment type found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AppointmentType"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
                 }
               }
             }
@@ -229,6 +358,24 @@
           "message": {
             "type": "string",
             "description": "Incorrect email"
+          }
+        }
+      },
+      "GeneralError": {
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
           }
         }
       },
@@ -446,19 +593,35 @@
           }
         }
       },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "AppointmentType": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "duration",
+          "provider_ids",
+          "room_ids"
+        ],
         "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
+          "id": {
+            "type": "string",
+            "description": "The ID of the appointment type"
           },
-          "message": {
-            "type": "string"
+          "name": {
+            "type": "string",
+            "description": "The name of the appointment type"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "The duration of the appointment type in minutes"
+          },
+          "provider_ids": {
+            "type": "array",
+            "description": "The IDs of the providers that can service this appointment type"
+          },
+          "room_ids": {
+            "type": "array",
+            "description": "The IDs of the rooms that can service this appointment type"
           }
         }
       }
