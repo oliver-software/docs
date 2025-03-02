@@ -47,13 +47,15 @@
           {
             "group": "Clients Endpoints",
             "pages": [
-              "api-reference/clients/index"
+              "api-reference/clients/index",
+              "api-reference/clients/show"
             ]
           },
           {
             "group": "Patients Endpoints",
             "pages": [
-              "api-reference/patients/index"
+              "api-reference/patients/index",
+              "api-reference/patients/show"
             ]
           },
           {
@@ -66,7 +68,8 @@
           {
             "group": "Rooms Endpoints",
             "pages": [
-              "api-reference/rooms/index"
+              "api-reference/rooms/index",
+              "api-reference/rooms/show"
             ]
           }
         ]

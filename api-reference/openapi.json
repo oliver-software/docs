@@ -398,6 +398,411 @@
           }
         }
       }
+    },
+    "/services/core/v1/clients": {
+      "get": {
+        "description": "List clients. At least one of name, email, or phone must be provided.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter clients by name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Filter clients by email",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "Filter clients by phone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of clients found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Client"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/clients/{id}": {
+      "get": {
+        "description": "Get a client by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the client to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Client"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/rooms": {
+      "get": {
+        "description": "List rooms",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optionally filter rooms by name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of rooms found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Room"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/rooms/{id}": {
+      "get": {
+        "description": "Get a room by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the room to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Room found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Room"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/patients": {
+      "get": {
+        "description": "List patients",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optionally filter patients by name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of patients found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Patient"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/patients/{id}": {
+      "get": {
+        "description": "Get a patient by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the patient to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patient found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Patient"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -768,6 +1173,83 @@
           "name": {
             "type": "string",
             "description": "The name of the provider"
+          }
+        }
+      },
+      "Client": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the client"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the client"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address of the client"
+          },
+          "phone": {
+            "type": "string",
+            "description": "The phone number of the client"
+          }
+        }
+      },
+      "Room": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the room"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the room"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the room"
+          }
+        }
+      },
+      "Patient": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "client_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the patient"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the patient"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The ID of the client that owns this patient"
+          },
+          "species": {
+            "type": "string",
+            "description": "The species of the patient"
+          },
+          "breed": {
+            "type": "string",
+            "description": "The breed of the patient"
           }
         }
       }

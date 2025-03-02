@@ -1,13 +1,13 @@
 ---
-title: 'List Patients'
-api: 'GET /services/core/v1/patients'
-description: 'List patients with optional name filter'
+title: 'Get Patient'
+api: 'GET /services/core/v1/patients/{id}'
+description: 'Get a patient by ID'
 ---
 
-## Request Parameters
+## Path Parameters
 
-<ParamField query="name" type="string" required={false}>
-  Filter patients by name
+<ParamField path="id" type="string" required>
+  The ID of the patient to get
 </ParamField>
 
 ## Response
@@ -16,8 +16,8 @@ description: 'List patients with optional name filter'
   Indicates if the request was successful
 </ResponseField>
 
-<ResponseField name="data" type="array" required>
-  Array of patients
+<ResponseField name="data" type="object" required>
+  The patient object
   <Expandable title="Patient properties">
     <ResponseField name="id" type="string" required>
       The ID of the patient
@@ -43,7 +43,7 @@ description: 'List patients with optional name filter'
 
 <RequestExample>
 ```bash Example Request
-curl -X GET 'https://partner-api.getoliver.com/services/core/v1/patients?name=Max' \
+curl -X GET 'https://partner-api.getoliver.com/services/core/v1/patients/pat_123' \
 -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 </RequestExample>
@@ -52,18 +52,14 @@ curl -X GET 'https://partner-api.getoliver.com/services/core/v1/patients?name=Ma
 ```json Response
 {
   "success": true,
-  "data": [
-    {
-      "id": "pat_123",
-      "name": "Max",
-      "client_id": "cli_456",
-      "species": "Dog",
-      "breed": "Golden Retriever"
-    }
-  ],
-  "message": "1 patient found"
+  "data": {
+    "id": "pat_123",
+    "name": "Max",
+    "client_id": "cli_456",
+    "species": "Dog",
+    "breed": "Golden Retriever"
+  },
+  "message": "Patient found"
 }
 ```
 </ResponseExample>
-
-
