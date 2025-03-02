@@ -269,6 +269,135 @@
           }
         }
       }
+    },
+    "/services/core/v1/providers": {
+      "get": {
+        "description": "List providers",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Optionally filter providers by name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of providers found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Provider"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/v1/providers/{id}": {
+      "get": {
+        "description": "Get a provider by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the provider to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Provider"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -622,6 +751,23 @@
           "room_ids": {
             "type": "array",
             "description": "The IDs of the rooms that can service this appointment type"
+          }
+        }
+      },
+      "Provider": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the provider"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the provider"
           }
         }
       }

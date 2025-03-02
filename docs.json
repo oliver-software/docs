@@ -59,7 +59,8 @@
           {
             "group": "Providers Endpoints",
             "pages": [
-              "api-reference/providers/index"
+              "api-reference/providers/index",
+              "api-reference/providers/show"
             ]
           },
           {
