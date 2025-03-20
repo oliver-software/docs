@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "Oliver Partner API",
+    "description": "API for partners to interact with Oliver",
     "license": {
       "name": "MIT"
     },
@@ -77,9 +77,20 @@
         }
       }
     },
-    "/services/core/open_api/v1/time_slots/open_times": {
+    "/services/core/open_api/v1/open_times": {
       "post": {
         "description": "Search for open times for a given provider, appointment type, etc. Can be used to find open times in the future or past.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "description": "Open times request",
           "content": {
@@ -1055,26 +1066,6 @@
     }
   },
   "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
   },
   "components": {
     "schemas": {
@@ -1166,8 +1157,7 @@
         "type": "object",
         "required": [
           "exact_start_date",
-          "appointment_type_id",
-          "provider_ids"
+          "appointment_type_id"
         ],
         "properties": {
           "exact_start_date": {
@@ -1178,13 +1168,13 @@
           },
           "days_to_check": {
             "type": "integer",
-            "description": "The number of days from exact_start_date to check at a time for open times. A smaller number may return results faster because the API will first return results if there are open times available in the window specified.",
-            "default": 30
+            "description": "The number of days from exact_start_date to check at a time for open times. A smaller number may return results faster because the API will first return results if there are open times available in the window specified. A large number, such as 30, won't return results until all 30 days are searched.",
+            "default": 7
           },
           "max_attempts": {
             "type": "integer",
-            "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from exact_start_date and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will effectively check 30 days for open times, but will return the first result as soon as it finds open times.",
-            "default": 4
+            "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from exact_start_date and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will check *up to* 30 days (3 * 10) for open times, but will return the first result as soon as it finds open times in any 3 day window.",
+            "default": 1
           },
           "appointment_type_id": {
             "type": "string",
@@ -1224,7 +1214,6 @@
         "type": "object",
         "required": [
           "date",
-          "start_date",
           "available",
           "times"
         ],
@@ -1234,12 +1223,6 @@
             "format": "date",
             "example": "MM/DD/YYYY",
             "description": "The date of this result in MM/DD/YYYY format"
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-01-01T00:00:00-06:00",
-            "description": "The date of this result in ISO 8601 format"
           },
           "available": {
             "type": "boolean",
@@ -1258,19 +1241,20 @@
       "TimeSlot": {
         "type": "object",
         "required": [
-          "internal_start",
-          "internal_end",
+          "start",
+          "end",
           "label",
           "provider_id",
-          "value"
+          "value",
+          "uuid"
         ],
         "properties": {
-          "internal_start": {
+          "start": {
             "type": "string",
             "format": "time",
             "description": "The start time of this result formatted as 2025-01-01T16:00:00-06:00"
           },
-          "internal_end": {
+          "end": {
             "type": "string",
             "format": "time",
             "description": "The end time of this result formatted as 2025-01-01T16:20:00-06:00 (20 minutes after the start time)"
@@ -1291,10 +1275,9 @@
             "type": "string",
             "description": "The label of this result formatted like 4:00 pm"
           },
-          "enabled": {
-            "type": "boolean",
-            "example": true,
-            "description": "Whether this result is enabled"
+          "uuid": {
+            "type": "string",
+            "description": "The UUID of this result. Can be passed back to the API along with client and patient information to create an appointment with this open time result."
           }
         }
       },
