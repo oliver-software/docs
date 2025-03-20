@@ -77,7 +77,7 @@
         }
       }
     },
-    "/services/core/v1/time_slots/open_times": {
+    "/services/core/open_api/v1/time_slots/open_times": {
       "post": {
         "description": "Search for open times for a given provider, appointment type, etc. Can be used to find open times in the future or past.",
         "requestBody": {
@@ -100,11 +100,41 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/services/core/v1/appointments": {
+    "/services/core/open_api/v1/appointments": {
       "post": {
         "description": "Create an appointment",
         "requestBody": {
@@ -128,6 +158,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -137,14 +177,33 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/services/core/v1/appointment_types": {
+    "/services/core/open_api/v1/appointment_types": {
       "get": {
         "description": "List appointment types",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "name",
             "in": "query",
@@ -184,6 +243,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -207,10 +276,19 @@
         }
       }
     },
-    "/services/core/v1/appointment_types/{id}": {
+    "/services/core/open_api/v1/appointment_types/{id}": {
       "get": {
         "description": "Get an appointment type by ID",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -247,6 +325,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -270,10 +358,19 @@
         }
       }
     },
-    "/services/core/v1/providers": {
+    "/services/core/open_api/v1/providers": {
       "get": {
         "description": "List providers",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "name",
             "in": "query",
@@ -313,6 +410,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -336,10 +443,19 @@
         }
       }
     },
-    "/services/core/v1/providers/{id}": {
+    "/services/core/open_api/v1/providers/{id}": {
       "get": {
         "description": "Get a provider by ID",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -376,6 +492,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -399,10 +525,19 @@
         }
       }
     },
-    "/services/core/v1/clients": {
+    "/services/core/open_api/v1/clients": {
       "get": {
         "description": "List clients using filters",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "name",
             "in": "query",
@@ -460,6 +595,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -483,10 +628,19 @@
         }
       }
     },
-    "/services/core/v1/clients/{id}": {
+    "/services/core/open_api/v1/clients/{id}": {
       "get": {
         "description": "Get a client by ID",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -523,6 +677,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -546,10 +710,19 @@
         }
       }
     },
-    "/services/core/v1/rooms": {
+    "/services/core/open_api/v1/rooms": {
       "get": {
         "description": "List rooms",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "name",
             "in": "query",
@@ -589,6 +762,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -612,10 +795,19 @@
         }
       }
     },
-    "/services/core/v1/rooms/{id}": {
+    "/services/core/open_api/v1/rooms/{id}": {
       "get": {
         "description": "Get a room by ID",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -652,6 +844,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -675,10 +877,19 @@
         }
       }
     },
-    "/services/core/v1/patients": {
+    "/services/core/open_api/v1/patients": {
       "get": {
         "description": "List patients for a specific client. Requires client_id and optionally filters by name.",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "client_id",
             "in": "query",
@@ -727,6 +938,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -750,10 +971,19 @@
         }
       }
     },
-    "/services/core/v1/patients/{id}": {
+    "/services/core/open_api/v1/patients/{id}": {
       "get": {
         "description": "Get a patient by ID",
         "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "in": "path",
@@ -786,6 +1016,16 @@
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
                 }
               }
             }
@@ -1143,7 +1383,6 @@
           "name",
           "duration",
           "provider_ids",
-          "room_ids"
         ],
         "properties": {
           "id": {
@@ -1161,10 +1400,6 @@
           "provider_ids": {
             "type": "array",
             "description": "The IDs of the providers that can service this appointment type"
-          },
-          "room_ids": {
-            "type": "array",
-            "description": "The IDs of the rooms that can service this appointment type"
           }
         }
       },
@@ -1172,7 +1407,9 @@
         "type": "object",
         "required": [
           "id",
-          "name"
+          "name",
+          "appointment_type_ids",
+          "room_ids"
         ],
         "properties": {
           "id": {
@@ -1183,9 +1420,19 @@
             "type": "string",
             "description": "The name of the provider"
           },
-          "default_room_id": {
-            "type": "string",
-            "description": "The ID of the default scheduling room for this provider, if applicable."
+          "appointment_type_ids": {
+            "type": "array",
+            "description": "The IDs of the appointment types that this provider offers",
+            "items": {
+              "type": "string"
+            }
+          },
+          "room_ids": {
+            "type": "array",
+            "description": "The IDs of the rooms that this provider can be booked into. Empty if rooms are not applicable for this provider.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1218,6 +1465,10 @@
             "items": {
               "$ref": "#/components/schemas/Patient"
             }
+          },
+          "remote_id": {
+            "type": "string",
+            "description": "The ID of the client in the remote system it was imported from, if available"
           }
         }
       },
