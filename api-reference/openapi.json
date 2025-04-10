@@ -1157,7 +1157,7 @@
         "type": "object",
         "required": [
           "exact_start_date",
-          "appointment_type_id"
+          "appointment_type_ids"
         ],
         "properties": {
           "exact_start_date": {
@@ -1176,9 +1176,12 @@
             "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from exact_start_date and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will check *up to* 30 days (3 * 10) for open times, but will return the first result as soon as it finds open times in any 3 day window.",
             "default": 1
           },
-          "appointment_type_id": {
-            "type": "string",
-            "description": "The ID of the appointment type to check for open times."
+          "appointment_type_ids": {
+            "type": "array",
+            "description": "An array of appointment type IDs to check for open times. At least one appointment type ID is required.",
+            "items": {
+              "type": "string"
+            }
           },
           "provider_ids": {
             "type": "array",
@@ -1266,6 +1269,13 @@
           "room_id": {
             "type": "string",
             "description": "The ID of the room that this result is for, if applicable"
+          },
+          "appointment_type_ids": {
+            "type": "array",
+            "description": "The IDs of the appointment types that this result is available for",
+            "items": {
+              "type": "string"
+            }
           },
           "value": {
             "type": "string",
