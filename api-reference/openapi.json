@@ -159,9 +159,9 @@
             }
           },
           {
-            "name": "created_at_start",
+            "name": "updated_at_start",
             "in": "query",
-            "description": "Start date of the range in which results were created",
+            "description": "Start date of the range in which results were last updated",
             "required": true,
             "schema": {
               "type": "string",
@@ -169,9 +169,9 @@
             }
           },
           {
-            "name": "created_at_end",
+            "name": "updated_at_end",
             "in": "query",
-            "description": "End date of the range in which results were created",
+            "description": "End date of the range in which results were last updated",
             "required": true,
             "schema": {
               "type": "string",
@@ -1515,8 +1515,6 @@
       "Appointment": {
         "type": "object",
         "required": [
-          "id",
-          "remote_id"
         ],
         "properties": {
           "id": {
@@ -1526,6 +1524,26 @@
           "remote_id": {
             "type": "string",
             "description": "The remote ID of the appointment (The ID in the PIMS)"
+          },
+          "booking_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date/time of the appointment in ISO 8601 format"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end date/time of the appointment in ISO 8601 format"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date/time the appointment was created in ISO 8601 format"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date/time the appointment was last updated in ISO 8601 format"
           },
           "referral_source": {
             "type": "string",
