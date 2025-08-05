@@ -34,6 +34,7 @@
           {
             "group": "Appointments Endpoints",
             "pages": [
+              "api-reference/appointments/index",
               "api-reference/appointments/create"
             ]
           },

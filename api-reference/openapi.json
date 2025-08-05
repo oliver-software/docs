@@ -146,6 +146,118 @@
       }
     },
     "/services/core/open_api/v1/appointments": {
+      "get": {
+        "description": "List appointments",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at_start",
+            "in": "query",
+            "description": "Start date of the range in which results were created",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "created_at_end",
+            "in": "query",
+            "description": "End date of the range in which results were created",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page. Max is 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/AppointmentResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "description": "Create an appointment",
         "requestBody": {
@@ -1369,13 +1481,85 @@
           }
         }
       },
+      "AppointmentResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_pages",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "array",
+            "description": "An array of appointments",
+            "items": {
+              "$ref": "#/components/schemas/Appointment"
+            }
+          }
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "required": [
+          "id",
+          "remote_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the appointment"
+          },
+          "remote_id": {
+            "type": "string",
+            "description": "The remote ID of the appointment (The ID in the PIMS)"
+          },
+          "referral_source": {
+            "type": "string",
+            "description": "If a referral source was provided to the session in which the appointment was booked online, it will be returned here"
+          },
+          "client_first_name": {
+            "type": "string",
+            "description": "The first name of the client that booked the appointment"
+          },
+          "client_last_name": {
+            "type": "string",
+            "description": "The last name of the client that booked the appointment"
+          },
+          "client_email": {
+            "type": "string",
+            "description": "The email address of the client that booked the appointment"
+          },
+          "client_phone": {
+            "type": "string",
+            "description": "The phone number of the client that booked the appointment"
+          },
+          "patient_name": {
+            "type": "string",
+            "description": "The name of the patient that booked the appointment"
+          }
+        }
+      },
       "AppointmentType": {
         "type": "object",
         "required": [
           "id",
           "name",
           "duration",
-          "provider_ids",
+          "provider_ids"
         ],
         "properties": {
           "id": {
