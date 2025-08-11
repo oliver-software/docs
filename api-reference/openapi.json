@@ -165,17 +165,17 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "date"
+              "format": "date-time"
             }
           },
           {
             "name": "updated_at_end",
             "in": "query",
-            "description": "End date of the range in which results were last updated",
-            "required": true,
+            "description": "End date of the range in which results were last updated. If not provided, the current date will be used.",
+            "required": false,
             "schema": {
               "type": "string",
-              "format": "date"
+              "format": "date-time"
             }
           },
           {
@@ -1525,6 +1525,10 @@
             "type": "string",
             "description": "The remote ID of the appointment (The ID in the PIMS)"
           },
+          "status": {
+            "type": "string",
+            "description": "The status of the appointment. 'REQUESTED', 'ACCEPTED', 'CONFIRMED', 'DELETED', 'IN_PROGRESS', 'DECLINED', 'DONE'"
+          },
           "booking_date": {
             "type": "string",
             "format": "date-time",
@@ -1564,6 +1568,10 @@
           "client_phone": {
             "type": "string",
             "description": "The phone number of the client that booked the appointment"
+          },
+          "client_type": {
+            "type": "string",
+            "description": "The type of client that booked the appointment. 'NEW' or 'RETURNING'"
           },
           "patient_name": {
             "type": "string",
