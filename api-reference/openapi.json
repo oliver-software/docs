@@ -1551,7 +1551,15 @@
           },
           "referral_source": {
             "type": "string",
-            "description": "If a referral source was provided to the session in which the appointment was booked online, it will be returned here"
+            "description": "If a referral source (utm_source) was provided to the session in which the appointment was booked online, it will be returned here"
+          },
+          "referral_campaign": {
+            "type": "string",
+            "description": "If a referral campaign (utm_campaign) was provided to the session in which the appointment was booked online, it will be returned here"
+          },
+          "referral_medium": {
+            "type": "string",
+            "description": "If a referral medium (utm_medium) was provided to the session in which the appointment was booked online, it will be returned here"
           },
           "client_first_name": {
             "type": "string",
