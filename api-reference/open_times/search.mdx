@@ -3,4 +3,13 @@ title: 'Search Open Times'
 openapi: 'POST /services/core/open_api/v1/open_times'
 ---
 
+Search for open appointment times.
 
+## Request Body
+
+- **search_from_date** (required): The start date/time of the search in ISO 8601 format. Can be a present or future timestamp.
+- **appointment_type** (required): A string of the appointment type category. Available options: `wellness`, `sick`, `technician`, `recheck`.
+
+<Warning>
+  This endpoint is currently proposed and subject to change. Functionality, request/response structure, and availability may be modified or removed in future releases. Use with caution in production environments.
+</Warning>

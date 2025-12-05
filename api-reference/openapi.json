@@ -1268,39 +1268,25 @@
       "OpenTimesRequest": {
         "type": "object",
         "required": [
-          "exact_start_date",
-          "appointment_type_ids"
+          "search_from_date",
+          "appointment_type"
         ],
         "properties": {
-          "exact_start_date": {
+          "search_from_date": {
             "type": "string",
-            "format": "date",
-            "description": "The start date/time of the search in ISO 8601 format. Can be a past, present, or future timestamp.",
+            "format": "date-time",
+            "description": "The start date/time of the search in ISO 8601 format. Can be a present or future timestamp.",
             "example": "2025-01-01T07:00:00Z"
           },
-          "days_to_check": {
-            "type": "integer",
-            "description": "The number of days from exact_start_date to check at a time for open times. A smaller number may return results faster because the API will first return results if there are open times available in the window specified. A large number, such as 30, won't return results until all 30 days are searched.",
-            "default": 7
-          },
-          "max_attempts": {
-            "type": "integer",
-            "description": "The number of times to iterate over days_to_check to find open times. For example, if days_to_check is 3, and max_attempts is 1, the API will check 3 days for open times for up to 3 days from exact_start_date and return, regardless of whether it finds open times or not. If days_to_check is 3, and max_attempts is 10, the API will check *up to* 30 days (3 * 10) for open times, but will return the first result as soon as it finds open times in any 3 day window.",
-            "default": 1
-          },
-          "appointment_type_ids": {
-            "type": "array",
-            "description": "An array of appointment type IDs to check for open times. At least one appointment type ID is required.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "provider_ids": {
-            "type": "array",
-            "description": "An array of provider IDs to check for open times. If an empty array is provided, the API will check for open times for all providers that service the specified appointment type.",
-            "items": {
-              "type": "string"
-            }
+          "appointment_type": {
+            "type": "string",
+            "enum": [
+              "wellness",
+              "sick",
+              "technician",
+              "recheck"
+            ],
+            "description": "An string of the appointment type category. Available options: `wellness`, `sick`, `technician`, `recheck`."
           }
         }
       },

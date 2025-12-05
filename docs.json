@@ -39,13 +39,6 @@
             ]
           },
           {
-            "group": "Appointment Types Endpoints",
-            "pages": [
-              "api-reference/appointment_types/index",
-              "api-reference/appointment_types/show"
-            ]
-          },
-          {
             "group": "Clients Endpoints",
             "pages": [
               "api-reference/clients/index",
@@ -57,20 +50,6 @@
             "pages": [
               "api-reference/patients/index",
               "api-reference/patients/show"
-            ]
-          },
-          {
-            "group": "Providers Endpoints",
-            "pages": [
-              "api-reference/providers/index",
-              "api-reference/providers/show"
-            ]
-          },
-          {
-            "group": "Rooms Endpoints",
-            "pages": [
-              "api-reference/rooms/index",
-              "api-reference/rooms/show"
             ]
           }
         ]
