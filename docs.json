@@ -55,7 +55,7 @@
           {
             "group": "Webhooks",
             "pages": [
-              "api-reference/webhooks/index"
+              "api-reference/webhooks/service_reminder"
             ]
           }
         ]

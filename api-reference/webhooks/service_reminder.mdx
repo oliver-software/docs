@@ -1,0 +1,57 @@
+---
+title: 'Service Reminder Webhook'
+description: 'Receive notifications when service reminders are due'
+---
+
+## Overview
+
+The Service Reminder webhook notifies your system when a patient has services coming due. When a service reminder is triggered, Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the reminder details.
+
+## Payload Structure
+
+The webhook payload is sent as a JSON object with the following structure:
+
+<ResponseField name="practice_name" type="string" required>
+  The name of the veterinary practice associated with the reminder.
+</ResponseField>
+
+<ResponseField name="client_id" type="string" required>
+  The unique identifier for the client (pet owner) who should be notified.
+</ResponseField>
+
+<ResponseField name="patient_id" type="string" required>
+  The unique identifier for the patient (pet) who has services due.
+</ResponseField>
+
+<ResponseField name="service_code_ids" type="array" required>
+  An array of service code identifiers for the services that are due.
+</ResponseField>
+
+<ResponseField name="due_at" type="string" required>
+  The date and time when the services are due, in ISO 8601 format.
+</ResponseField>
+
+## Example Payload
+
+```json
+{
+  "practice_name": "Happy Paws Veterinary Clinic",
+  "client_id": "cli_abc123",
+  "patient_id": "pat_xyz789",
+  "service_code_ids": ["svc_001", "svc_002"],
+  "due_at": "2025-01-15T14:30:00Z"
+}
+```
+
+## Handling the Webhook
+
+When receiving a service reminder webhook, your endpoint should:
+
+1. Respond with a `200 OK` status code to acknowledge receipt
+2. Process the reminder asynchronously if needed to avoid timeouts
+3. Use the `client_id` and `patient_id` to look up contact information
+4. Send appropriate reminder notifications to the client
+
+<Note>
+  If your endpoint fails to respond with a success status code, Oliver may retry the webhook delivery.
+</Note>
