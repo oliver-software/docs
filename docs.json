@@ -51,6 +51,12 @@
               "api-reference/patients/index",
               "api-reference/patients/show"
             ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks/index"
+            ]
           }
         ]
       }

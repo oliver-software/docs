@@ -1,0 +1,56 @@
+---
+title: 'Webhooks'
+description: 'Receive real-time notifications from Oliver'
+---
+
+## Overview
+
+Webhooks allow you to receive real-time notifications when events occur in Oliver. When an event is triggered, Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the relevant data.
+
+## Webhook Payload Structure
+
+All webhook payloads are sent as JSON objects with the following structure:
+
+<ResponseField name="practice_name" type="string" required>
+  The name of the veterinary practice associated with the event.
+</ResponseField>
+
+<ResponseField name="client_id" type="string" required>
+  The unique identifier for the client (pet owner) associated with the event.
+</ResponseField>
+
+<ResponseField name="patient_id" type="string" required>
+  The unique identifier for the patient (pet) associated with the event.
+</ResponseField>
+
+<ResponseField name="service_code_ids" type="array" required>
+  An array of service code identifiers associated with the event.
+</ResponseField>
+
+<ResponseField name="due_at" type="string" required>
+  The date and time when the associated action is due, in ISO 8601 format.
+</ResponseField>
+
+## Example Payload
+
+```json
+{
+  "practice_name": "Happy Paws Veterinary Clinic",
+  "client_id": "cli_abc123",
+  "patient_id": "pat_xyz789",
+  "service_code_ids": ["svc_001", "svc_002"],
+  "due_at": "2025-01-15T14:30:00Z"
+}
+```
+
+## Handling Webhooks
+
+When receiving a webhook, your endpoint should:
+
+1. Respond with a `200 OK` status code to acknowledge receipt
+2. Process the payload asynchronously if needed to avoid timeouts
+3. Validate the payload structure before processing
+
+<Note>
+  If your endpoint fails to respond with a success status code, Oliver may retry the webhook delivery.
+</Note>
