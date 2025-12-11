@@ -1,15 +1,19 @@
 ---
 title: 'Service Reminder Webhook'
-description: 'Receive notifications when service reminders are due'
+description: 'Receive notifications about due service reminders'
 ---
 
 ## Overview
 
-The Service Reminder webhook notifies your system when a patient has services coming due. When a service reminder is triggered, Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the reminder details.
+The Service Reminder webhook notifies your system when a notification rule is triggered indicating that a service reminder is still due for a patient. Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the reminder details.
 
 ## Payload Structure
 
 The webhook payload is sent as a JSON object with the following structure:
+
+<ResponseField name="practice_id" type="string" required>
+  The unique identifier for the veterinary practice.
+</ResponseField>
 
 <ResponseField name="practice_name" type="string" required>
   The name of the veterinary practice associated with the reminder.
@@ -35,6 +39,7 @@ The webhook payload is sent as a JSON object with the following structure:
 
 ```json
 {
+  "practice_id": "pra_def456",
   "practice_name": "Happy Paws Veterinary Clinic",
   "client_id": "cli_abc123",
   "patient_id": "pat_xyz789",
@@ -43,14 +48,59 @@ The webhook payload is sent as a JSON object with the following structure:
 }
 ```
 
+## Verifying Webhook Signatures
+
+To ensure that webhook requests are genuinely from Oliver and have not been tampered with, each request includes a signature in the `X-Webhook-Signature` header. You should verify this signature before processing the payload.
+
+### Signature Verification Process
+
+1. Extract the `X-Webhook-Signature` header from the request
+2. Compute an HMAC-SHA256 hash of the raw request body using your webhook secret
+3. Compare the computed signature with the one in the header
+
+### Example Verification
+
+```python
+import hmac
+import hashlib
+
+def verify_webhook_signature(payload: bytes, signature: str, secret: str) -> bool:
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected_signature, signature)
+```
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload, 'utf-8')
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedSignature),
+    Buffer.from(signature)
+  );
+}
+```
+
+<Warning>
+  Always use constant-time comparison functions (like `hmac.compare_digest` in Python or `crypto.timingSafeEqual` in Node.js) to prevent timing attacks.
+</Warning>
+
 ## Handling the Webhook
 
 When receiving a service reminder webhook, your endpoint should:
 
-1. Respond with a `200 OK` status code to acknowledge receipt
-2. Process the reminder asynchronously if needed to avoid timeouts
-3. Use the `client_id` and `patient_id` to look up contact information
-4. Send appropriate reminder notifications to the client
+1. Verify the webhook signature
+2. Respond with a `200 OK` status code to acknowledge receipt
+3. Process the reminder asynchronously if needed to avoid timeouts
+4. Use the `client_id` and `patient_id` to look up contact information
+5. Send appropriate reminder notifications to the client
 
 <Note>
   If your endpoint fails to respond with a success status code, Oliver may retry the webhook delivery.
