@@ -5,14 +5,14 @@ description: 'Receive notifications about due service reminders'
 
 ## Overview
 
-The Service Reminder webhook notifies your system when a notification rule is triggered indicating that a service reminder is still due for a patient. Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the reminder details.
+The Service Reminder webhook notifies your system when a notification rule is triggered indicating that a service reminder is due for a patient. Oliver sends an HTTP POST request to your configured endpoint with a JSON payload containing the reminder details.
 
 ## Payload Structure
 
 The webhook payload is sent as a JSON object with the following structure:
 
 <ResponseField name="practice_id" type="string" required>
-  The unique identifier for the veterinary practice.
+  Oliver's unique identifier for the veterinary practice.
 </ResponseField>
 
 <ResponseField name="practice_name" type="string" required>
@@ -20,11 +20,19 @@ The webhook payload is sent as a JSON object with the following structure:
 </ResponseField>
 
 <ResponseField name="client_id" type="string" required>
-  The unique identifier for the client (pet owner) who should be notified.
+  Oliver's unique identifier for the client who should be notified.
+</ResponseField>
+
+<ResponseField name="remote_client_id" type="string">
+  The unique identifier for the client in the PIMS, if applicable.
 </ResponseField>
 
 <ResponseField name="patient_id" type="string" required>
-  The unique identifier for the patient (pet) who has services due.
+  Oliver's unique identifier for the patient (pet) who has services due.
+</ResponseField>
+
+<ResponseField name="remote_patient_id" type="string">
+  The unique identifier for the patient in the PIMS, if applicable.
 </ResponseField>
 
 <ResponseField name="service_code_ids" type="array" required>
@@ -42,7 +50,9 @@ The webhook payload is sent as a JSON object with the following structure:
   "practice_id": "pra_def456",
   "practice_name": "Happy Paws Veterinary Clinic",
   "client_id": "cli_abc123",
+  "remote_client_id": "12345",
   "patient_id": "pat_xyz789",
+  "remote_patient_id": "67890",
   "service_code_ids": ["svc_001", "svc_002"],
   "due_at": "2025-01-15T14:30:00Z"
 }
