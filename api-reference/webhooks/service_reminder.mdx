@@ -39,6 +39,10 @@ The webhook payload is sent as a JSON object with the following structure:
   The unique identifier for the patient in the PIMS, if applicable.
 </ResponseField>
 
+<ResponseField name="notification_rule_name" type="string" required>
+  The name of the notification rule that triggered this webhook.
+</ResponseField>
+
 <ResponseField name="reminders" type="array" required>
   An array of service reminder objects for the services that are due.
 
@@ -68,6 +72,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "remote_client_id": "12345",
   "patient_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
   "remote_patient_id": "67890",
+  "notification_rule_name": "2 weeks before due",
   "reminders": [
     {
       "code": "svc_001",
