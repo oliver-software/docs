@@ -15,12 +15,12 @@ The webhook payload is sent as a JSON object with the following structure:
   Oliver's unique identifier for the veterinary practice.
 </ResponseField>
 
-<ResponseField name="id" type="string" required>
-  A unique identifier for this webhook event.
-</ResponseField>
-
 <ResponseField name="practice_name" type="string" required>
   The name of the veterinary practice associated with the reminder.
+</ResponseField>
+
+<ResponseField name="id" type="string" required>
+  Oliver's unique identifier for the service reminder group.
 </ResponseField>
 
 <ResponseField name="client_id" type="string" required>
@@ -39,24 +39,50 @@ The webhook payload is sent as a JSON object with the following structure:
   The unique identifier for the patient in the PIMS, if applicable.
 </ResponseField>
 
-<ResponseField name="notification_rule_name" type="string" required>
+<ResponseField name="notification_rule_name" type="string">
   The name of the notification rule that triggered this webhook.
+</ResponseField>
+
+<ResponseField name="due_at" type="string" required>
+  The date and time when the service reminder group is due, in ISO 8601 format.
 </ResponseField>
 
 <ResponseField name="reminders" type="array" required>
   An array of service reminder objects for the services that are due.
 
   <Expandable title="Reminder object properties">
-    <ResponseField name="code" type="string" required>
-      The service code identifier for this reminder.
+    <ResponseField name="id" type="string" required>
+      Oliver's unique identifier for this service reminder.
     </ResponseField>
 
-    <ResponseField name="description" type="string" required>
+    <ResponseField name="code" type="string">
+      The service code identifier from the PIMS, or the display name if no remote ID exists.
+    </ResponseField>
+
+    <ResponseField name="description" type="string">
       A human-readable description of the service.
     </ResponseField>
 
-    <ResponseField name="due_at" type="string" required>
+    <ResponseField name="due_at" type="string">
       The date and time when this service is due, in ISO 8601 format.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="group_status" type="string" required>
+  The status of the reminders in the group. Possible values: `completed`, `partially_completed`, `deleted`, `incomplete`.
+</ResponseField>
+
+<ResponseField name="custom_fields" type="object">
+  Optional object containing additional fields for practices with a server ID configured.
+
+  <Expandable title="Custom fields properties">
+    <ResponseField name="server_id" type="string">
+      The server ID from the practice's metadata.
+    </ResponseField>
+
+    <ResponseField name="client_id" type="string">
+      A composite identifier combining the remote client ID and server ID in the format `{remote_client_id}-{server_id}`.
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -66,25 +92,29 @@ The webhook payload is sent as a JSON object with the following structure:
 ```json
 {
   "practice_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "id": "550e8400-e29b-41d4-a716-446655440000",
   "practice_name": "Happy Paws Veterinary Clinic",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "client_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
   "remote_client_id": "12345",
   "patient_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
   "remote_patient_id": "67890",
   "notification_rule_name": "2 weeks before due",
+  "due_at": "2025-01-15T05:00:00-05:00",
   "reminders": [
     {
-      "code": "svc_001",
+      "id": "d4e5f6a7-b8c9-0123-def0-234567890123",
+      "code": "WELL",
       "description": "Annual Wellness Exam",
-      "due_at": "2025-01-15T05:00:00Z"
+      "due_at": "2025-01-15T05:00:00-05:00"
     },
     {
-      "code": "svc_002",
+      "id": "e5f6a7b8-c9d0-1234-ef01-345678901234",
+      "code": "VAC002",
       "description": "Rabies Vaccination",
-      "due_at": "2025-01-20T05:00:00Z"
+      "due_at": "2025-01-20T05:00:00-05:00"
     }
-  ]
+  ],
+  "group_status": "incomplete"
 }
 ```
 
