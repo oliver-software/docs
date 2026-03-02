@@ -1570,6 +1570,14 @@
           "patient_name": {
             "type": "string",
             "description": "The name of the patient that booked the appointment"
+          },
+          "remote_client_id": {
+            "type": "string",
+            "description": "The remote ID of the client in the PIMS"
+          },
+          "remote_patient_id": {
+            "type": "string",
+            "description": "The remote ID of the patient in the PIMS"
           }
         }
       },
