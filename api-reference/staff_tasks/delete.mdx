@@ -1,0 +1,8 @@
+---
+title: 'Delete Staff Task'
+openapi: 'DELETE /services/core/open_api/v1/staff_tasks/{id}'
+---
+
+<Info>
+  Deleting a staff task performs a soft delete by setting the task status to `canceled` and recording the `finalized_at` timestamp. The task record is not permanently removed.
+</Info>
