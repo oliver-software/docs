@@ -1395,10 +1395,451 @@
           }
         }
       }
+    },
+    "/services/core/open_api/v1/staff_tasks": {
+      "get": {
+        "description": "List staff tasks with optional status filtering and pagination",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter tasks by status. Available values: `pending`, `completed`, `canceled`",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "completed",
+                "canceled"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page. Max is 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Staff tasks response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/StaffTaskListResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new staff task",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Staff task to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStaffTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Staff task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/StaffTask"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/open_api/v1/staff_tasks/{id}": {
+      "get": {
+        "description": "Get a staff task by ID",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the staff task",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Staff task found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/StaffTask"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update a staff task. Only provided fields will be updated.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the staff task to update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Fields to update on the staff task",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStaffTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Staff task updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/StaffTask"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a staff task. This performs a soft delete by setting the status to canceled.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the staff task to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Staff task canceled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
-  "webhooks": {
-  },
+  "webhooks": {},
   "components": {
     "schemas": {
       "SignInRequest": {
@@ -1720,8 +2161,7 @@
       },
       "Appointment": {
         "type": "object",
-        "required": [
-        ],
+        "required": [],
         "properties": {
           "id": {
             "type": "string",
@@ -2007,7 +2447,10 @@
             "description": "The furthest stage the user reached in the booking flow"
           },
           "client_type": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "new",
               "returning",
@@ -2016,23 +2459,38 @@
             "description": "Whether the client was new or returning. Null if not yet determined."
           },
           "appointment_id": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The ID of the appointment created by this session, if completed"
           },
           "remote_appointment_id": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The ID of the remote appointment created by this session, if completed"
           },
           "referral_source": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The referral source (utm_source) associated with this session"
           },
           "referral_campaign": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The referral campaign (utm_campaign) associated with this session"
           },
           "referral_medium": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The referral medium (utm_medium) associated with this session"
           },
           "created_at": {
@@ -2046,9 +2504,199 @@
             "description": "The date/time the session was last updated in ISO 8601 format"
           },
           "last_activity_at": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
             "description": "The date/time of the last user activity in the session in ISO 8601 format"
+          }
+        }
+      },
+      "StaffTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the staff task"
+          },
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "task",
+              "rx_refill"
+            ],
+            "description": "The type of staff task"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed",
+              "canceled"
+            ],
+            "description": "The current status of the task"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "A detailed description of the task"
+          },
+          "client_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the client associated with this task"
+          },
+          "patient_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the patient associated with this task"
+          },
+          "cancellation_allowed": {
+            "type": "boolean",
+            "description": "Whether the task can be canceled"
+          },
+          "override_completion_action_text": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custom text for the completion action button, if set"
+          },
+          "reference_time_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "A reference timestamp associated with the task in ISO 8601 format"
+          },
+          "finalized_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The timestamp when the task was completed or canceled in ISO 8601 format"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the task was created in ISO 8601 format"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the task was last updated in ISO 8601 format"
+          }
+        }
+      },
+      "StaffTaskListResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_pages",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "array",
+            "description": "An array of staff tasks",
+            "items": {
+              "$ref": "#/components/schemas/StaffTask"
+            }
+          }
+        }
+      },
+      "CreateStaffTaskRequest": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "A detailed description of the task"
+          },
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "task",
+              "rx_refill"
+            ],
+            "default": "task",
+            "description": "The type of staff task. Defaults to `task` if not provided. Allowed values: `task`, `rx_refill`"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The ID of the client to associate with this task"
+          },
+          "patient_id": {
+            "type": "string",
+            "description": "The ID of the patient to associate with this task"
+          },
+          "reference_time_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A reference timestamp for the task in ISO 8601 format"
+          }
+        }
+      },
+      "UpdateStaffTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the task"
+          },
+          "description": {
+            "type": "string",
+            "description": "A detailed description of the task"
+          },
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "task",
+              "rx_refill"
+            ],
+            "description": "The type of staff task. Allowed values: `task`, `rx_refill`"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed",
+              "canceled"
+            ],
+            "description": "The status of the task. Setting to `completed` or `canceled` will automatically set `finalized_at`. Setting back to `pending` will clear `finalized_at`."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The ID of the client to associate with this task"
+          },
+          "patient_id": {
+            "type": "string",
+            "description": "The ID of the patient to associate with this task"
+          },
+          "reference_time_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A reference timestamp for the task in ISO 8601 format"
           }
         }
       }

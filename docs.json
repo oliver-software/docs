@@ -60,6 +60,16 @@
             ]
           },
           {
+            "group": "Staff Tasks Endpoints",
+            "pages": [
+              "api-reference/staff_tasks/index",
+              "api-reference/staff_tasks/show",
+              "api-reference/staff_tasks/create",
+              "api-reference/staff_tasks/update",
+              "api-reference/staff_tasks/delete"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder"
