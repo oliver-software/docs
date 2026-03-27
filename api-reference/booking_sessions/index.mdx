@@ -1,0 +1,12 @@
+---
+title: 'List Booking Sessions'
+openapi: 'GET /services/core/open_api/v1/booking_sessions'
+---
+
+## Filtering by Status
+
+Use the `status` query parameter to filter sessions:
+
+- **active** — Session is currently in progress (not expired, no appointment created)
+- **completed** — Session resulted in a booked appointment
+- **abandoned** — Session expired without creating an appointment

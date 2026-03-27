@@ -1175,6 +1175,226 @@
           }
         }
       }
+    },
+    "/services/core/open_api/v1/booking_sessions": {
+      "get": {
+        "description": "List booking sessions within a date range, optionally filtered by status. Booking sessions represent user interactions with the online booking flow.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_at_start",
+            "in": "query",
+            "description": "Start of the date range for filtering sessions by updated_at. ISO 8601 format.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "updated_at_end",
+            "in": "query",
+            "description": "End of the date range for filtering sessions by updated_at. If not provided, the current date will be used.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter sessions by status. 'active' = in progress, 'completed' = resulted in an appointment, 'abandoned' = expired without booking.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "completed",
+                "abandoned"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (0-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking sessions response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/BookingSessionResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/open_api/v1/booking_sessions/{id}": {
+      "get": {
+        "description": "Get a booking session by ID",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the booking session to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking session found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BookingSession"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -1725,6 +1945,110 @@
           "breed": {
             "type": "string",
             "description": "The breed of the patient"
+          }
+        }
+      },
+      "BookingSessionResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page number (0-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "Number of results per page"
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total number of matching booking sessions"
+          },
+          "content": {
+            "type": "array",
+            "description": "An array of booking sessions",
+            "items": {
+              "$ref": "#/components/schemas/BookingSession"
+            }
+          }
+        }
+      },
+      "BookingSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the booking session"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "completed",
+              "abandoned"
+            ],
+            "description": "The status of the session. 'active' = in progress, 'completed' = resulted in an appointment, 'abandoned' = expired without booking."
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "started",
+              "client_identification",
+              "appointment_type_selection",
+              "scheduling",
+              "checkout",
+              "completed"
+            ],
+            "description": "The furthest stage the user reached in the booking flow"
+          },
+          "client_type": {
+            "type": ["string", "null"],
+            "enum": [
+              "new",
+              "returning",
+              null
+            ],
+            "description": "Whether the client was new or returning. Null if not yet determined."
+          },
+          "appointment_id": {
+            "type": ["string", "null"],
+            "description": "The ID of the appointment created by this session, if completed"
+          },
+          "remote_appointment_id": {
+            "type": ["string", "null"],
+            "description": "The ID of the remote appointment created by this session, if completed"
+          },
+          "referral_source": {
+            "type": ["string", "null"],
+            "description": "The referral source (utm_source) associated with this session"
+          },
+          "referral_campaign": {
+            "type": ["string", "null"],
+            "description": "The referral campaign (utm_campaign) associated with this session"
+          },
+          "referral_medium": {
+            "type": ["string", "null"],
+            "description": "The referral medium (utm_medium) associated with this session"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date/time the session was created in ISO 8601 format"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date/time the session was last updated in ISO 8601 format"
+          },
+          "last_activity_at": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "The date/time of the last user activity in the session in ISO 8601 format"
           }
         }
       }

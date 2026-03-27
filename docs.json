@@ -53,6 +53,13 @@
             ]
           },
           {
+            "group": "Booking Sessions Endpoints",
+            "pages": [
+              "api-reference/booking_sessions/index",
+              "api-reference/booking_sessions/show"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder"
