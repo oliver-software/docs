@@ -2046,58 +2046,60 @@
           },
           "uuid": {
             "type": "string",
-            "description": "The UUID of this result. Can be passed back to the API along with client and patient information to create an appointment with this open time result."
+            "description": "The slot identifier for this result. Pass this as `slot_id` to the Create Appointment endpoint along with client and patient information to book this time."
           }
         }
       },
       "CreateAppointmentRequest": {
         "type": "object",
         "required": [
-          "date",
-          "end_date",
-          "provider_id",
-          "appointment_type_id",
-          "patient_id",
-          "client_id"
+          "slot_id"
         ],
         "properties": {
-          "date": {
+          "slot_id": {
             "type": "string",
-            "format": "date",
-            "description": "The start date/time of the appointment in ISO 8601 format"
+            "description": "The slot identifier returned from the Search Open Times endpoint (the `uuid` field). Encodes the appointment type, provider, room, and time."
           },
-          "end_date": {
-            "type": "string",
-            "format": "date",
-            "description": "The end date/time of the appointment in ISO 8601 format"
+          "client_id": {
+            "type": "integer",
+            "description": "The internal Oliver ID of the client. Provide this, `client_remote_id`, or name + contact fields."
           },
-          "provider_id": {
+          "client_remote_id": {
             "type": "string",
-            "description": "The ID of the provider that this appointment is for"
+            "description": "The PIMS remote ID of the client. Alternative to `client_id`."
           },
-          "appointment_type_id": {
+          "first_name": {
             "type": "string",
-            "description": "The ID of the appointment type that this appointment is for"
+            "description": "Client first name. Must be combined with `last_name` and either `phone` or `email`."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Client last name. Must be combined with `first_name` and either `phone` or `email`."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Client phone number. Used with `first_name` + `last_name` to look up the client."
+          },
+          "email": {
+            "type": "string",
+            "description": "Client email. Used with `first_name` + `last_name` to look up the client."
+          },
+          "patient_id": {
+            "type": "integer",
+            "description": "The internal Oliver ID of the patient. Provide this or `patient_remote_id`."
+          },
+          "patient_remote_id": {
+            "type": "string",
+            "description": "The PIMS remote ID of the patient. Alternative to `patient_id`."
           },
           "note": {
             "type": "string",
-            "description": "A note for the appointment"
+            "description": "A note for the appointment."
           },
-          "patient_id": {
+          "status": {
             "type": "string",
-            "description": "The ID of the patient that this appointment is for"
-          },
-          "client_id": {
-            "type": "string",
-            "description": "The ID of the client that this appointment is for"
-          },
-          "room_id": {
-            "type": "string",
-            "description": "The ID of the room that this appointment is for"
-          },
-          "referral_source": {
-            "type": "string",
-            "description": "The partner's referral source for this appointment. e.g. 'Google', 'Facebook', 'Website', etc."
+            "description": "Appointment status override. If omitted, the clinic's auto-accept setting determines the status.",
+            "enum": ["REQUESTED", "ACCEPTED", "CONFIRMED"]
           }
         }
       },
@@ -2118,13 +2120,92 @@
             ],
             "properties": {
               "id": {
+                "type": "integer",
+                "description": "The internal Oliver ID of the appointment"
+              },
+              "remote_id": {
                 "type": "string",
-                "description": "The ID of the appointment that was created"
+                "nullable": true,
+                "description": "The PIMS remote ID of the appointment, if synced"
+              },
+              "remote_client_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "The PIMS remote ID of the client"
+              },
+              "remote_patient_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "The PIMS remote ID of the patient"
+              },
+              "status": {
+                "type": "string",
+                "description": "The appointment status",
+                "enum": ["REQUESTED", "ACCEPTED", "CONFIRMED", "IN_PROGRESS", "DONE", "DELETED", "DECLINED"]
+              },
+              "booking_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The start date/time of the appointment in ISO 8601 format"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The end date/time of the appointment in ISO 8601 format"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the appointment was created in ISO 8601 format"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the appointment was last updated in ISO 8601 format"
+              },
+              "referral_source": {
+                "type": "string",
+                "nullable": true
+              },
+              "referral_campaign": {
+                "type": "string",
+                "nullable": true
+              },
+              "referral_medium": {
+                "type": "string",
+                "nullable": true
+              },
+              "client_first_name": {
+                "type": "string",
+                "description": "The client's first name"
+              },
+              "client_last_name": {
+                "type": "string",
+                "description": "The client's last name"
+              },
+              "client_email": {
+                "type": "string",
+                "nullable": true,
+                "description": "The client's email address"
+              },
+              "client_phone": {
+                "type": "string",
+                "nullable": true,
+                "description": "The client's phone number"
+              },
+              "client_type": {
+                "type": "string",
+                "description": "Whether the client is NEW or RETURNING"
+              },
+              "patient_name": {
+                "type": "string",
+                "description": "The patient's name"
               }
             }
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "A human-readable message, e.g. 'Appointment created successfully'"
           }
         }
       },
