@@ -3,4 +3,25 @@ title: 'Create Appointment'
 openapi: 'POST /services/core/open_api/v1/appointments'
 ---
 
+Create an appointment using a time slot from the [Search Open Times](/api-reference/open-times/search) endpoint.
 
+## Workflow
+
+1. Call [Search Open Times](/api-reference/open-times/search) to get available slots
+2. Use the `uuid` from a result as the `slot_id` in this request
+3. Identify the client and patient using one of the supported lookup methods
+
+## Client Identification
+
+Provide **one** of the following to identify the client:
+
+- `client_id` — internal Oliver ID
+- `client_remote_id` — PIMS remote ID
+- `first_name` + `last_name` + (`phone` or `email`) — name-based lookup
+
+## Patient Identification
+
+Provide **one** of the following to identify the patient:
+
+- `patient_id` — internal Oliver ID
+- `patient_remote_id` — PIMS remote ID
