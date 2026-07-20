@@ -1870,15 +1870,6 @@
             }
           },
           {
-            "name": "batch_id",
-            "in": "query",
-            "required": false,
-            "description": "Filter to requests created in a specific batch.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "in": "query",
             "required": false,
@@ -1950,7 +1941,7 @@
       },
       "post": {
         "summary": "Trigger an AI outbound contact",
-        "description": "Trigger an AI outbound contact flow (SMS today) for a single client. Intake is synchronous \u2014 Oliver validates the request, resolves the target client, and runs suppression checks before responding. The actual outreach is dispatched asynchronously; the final outcome is delivered to your `callback_url` webhook (if provided) and is always available via `GET /ai_outbound/requests/{id}`.\n\nA suppressed request is **not** an error: it returns `200 OK` with `status: \"suppressed\"` and a `suppression_reason`. Only malformed or unresolvable input returns a `400`.\n\nProvide at least one of `client_id` or `contact_number` to identify the target. Set `partner_request_id` to make the call idempotent \u2014 re-submitting the same value returns the existing request instead of creating a new one.",
+        "description": "Trigger an AI outbound contact flow (SMS today) for a single client. Intake is synchronous \u2014 Oliver validates the request, resolves the target client, and runs suppression checks before responding. The actual outreach is dispatched asynchronously; the final outcome is delivered to your `callback_url` webhook, if provided.\n\nA suppressed request is **not** an error: it returns `200 OK` with `status: \"suppressed\"` and a `suppression_reason`. Only malformed or unresolvable input returns a `400`.\n\nProvide at least one of `client_id` or `contact_number` to identify the target. Set `partner_request_id` to make the call idempotent \u2014 re-submitting the same value returns the existing request instead of creating a new one.",
         "parameters": [
           {
             "name": "X-Client-Id",
@@ -3120,11 +3111,6 @@
             "nullable": true,
             "description": "The idempotency key you supplied, if any."
           },
-          "batch_id": {
-            "type": "string",
-            "nullable": true,
-            "description": "Identifier of the batch this request belongs to, if it was created as part of one."
-          },
           "channel": {
             "type": "string",
             "enum": [
@@ -3218,9 +3204,10 @@
       "CreateAiOutboundRequest": {
         "type": "object",
         "required": [
-          "purpose"
+          "purpose",
+          "contact_number"
         ],
-        "description": "At least one of `client_id` or `contact_number` must be provided to identify the target client.",
+        "description": "Provide `contact_number` to identify the target client. `client_id` may also be supplied to resolve the client directly.",
         "properties": {
           "purpose": {
             "type": "string",
@@ -3243,11 +3230,11 @@
           },
           "client_id": {
             "type": "string",
-            "description": "Oliver's identifier for the target client. Provide this or `contact_number`."
+            "description": "Oliver's identifier for the target client. Optional; resolves the client directly."
           },
           "contact_number": {
             "type": "string",
-            "description": "The client's phone number in E.164 or local format. Provide this or `client_id`."
+            "description": "The client's phone number in E.164 or local format. Required."
           },
           "client_name": {
             "type": "string",
@@ -3264,6 +3251,10 @@
           "context": {
             "type": "string",
             "description": "Free-text context that guides the AI opener (e.g. \"overdue for annual wellness exam\")."
+          },
+          "initial_message_script": {
+            "type": "string",
+            "description": "The exact opening message for the AI to send. If provided, Oliver uses it verbatim; otherwise Oliver generates an opener based on the `purpose`."
           },
           "partner_request_id": {
             "type": "string",
