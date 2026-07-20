@@ -1,0 +1,47 @@
+---
+title: 'AI Outbound Overview'
+description: 'Programmatically trigger AI-driven outbound contact with a client'
+---
+
+The AI Outbound API lets a partner ask Oliver to reach out to a specific client on the practice's behalf. Oliver's AI handles the conversation — today over SMS — for a given purpose such as booking an appointment or a prescription refill follow-up.
+
+## How it works
+
+1. **Trigger** — POST a request to [`/ai_outbound/requests`](/api-reference/ai_outbound/create) identifying the client (by `client_id` or `contact_number`) and the `purpose` of the outreach.
+2. **Synchronous intake** — Oliver validates the input, resolves the client, and runs suppression checks before responding. A queued request returns `201`; a suppressed request returns `200` with a `suppression_reason`.
+3. **Asynchronous dispatch** — Oliver composes an opener and starts the conversation. The request moves through `queued` → `in_progress`.
+4. **Outcome** — when the conversation resolves, the request reaches a terminal status (`completed`, `suppressed`, or `failed`). If you supplied a `callback_url`, Oliver delivers an [outcome webhook](/api-reference/ai_outbound/outcome_webhook); the outcome is also available anytime via [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show).
+
+## Purposes
+
+| Purpose | Use case |
+| --- | --- |
+| `scheduling` | Invite the client to book or reschedule an appointment. |
+| `callback_followup` | Follow up on a requested callback. |
+| `refill` | Prompt a prescription refill. |
+| `general` | General-purpose outreach guided by your `context`. |
+
+## Statuses
+
+A request moves through a linear lifecycle:
+
+`received` → `queued` → `in_progress` → one of `completed`, `suppressed`, `failed`
+
+When a request is `completed`, its `outcome` is one of `booked`, `opted_out`, `no_response`, or `undeliverable`.
+
+## Suppression
+
+Suppression is a normal, auditable outcome — not an error. Oliver will suppress a request (returning `200` with a `suppression_reason`) when contacting the client would be inappropriate, for example:
+
+- `recent_contact` — the client was already contacted within the recent-contact window.
+- `active_conversation` — there is already an open conversation with the client.
+- `sms_opted_out` — the client has opted out of SMS.
+- `voice_not_supported` — the `voice` channel is not yet available.
+
+## Idempotency
+
+Set `partner_request_id` to a unique value per logical request. Re-submitting the same `partner_request_id` returns the existing request rather than creating a duplicate, so retries are safe.
+
+## Rate limits
+
+Each practice is limited to **120 requests per minute**. Exceeding the limit returns `429 Too Many Requests`.
