@@ -70,6 +70,16 @@
             ]
           },
           {
+            "group": "AI Outbound Endpoints",
+            "pages": [
+              "api-reference/ai_outbound/overview",
+              "api-reference/ai_outbound/create",
+              "api-reference/ai_outbound/index",
+              "api-reference/ai_outbound/show",
+              "api-reference/ai_outbound/outcome_webhook"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder"

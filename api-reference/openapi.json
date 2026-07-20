@@ -1837,6 +1837,321 @@
           }
         }
       }
+    },
+    "/services/core/open_api/v1/ai_outbound/requests": {
+      "get": {
+        "summary": "List AI outbound requests",
+        "description": "List AI outbound contact requests for the practice, most recent first, with optional filtering and pagination.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by request status.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "received",
+                "queued",
+                "in_progress",
+                "completed",
+                "suppressed",
+                "failed"
+              ]
+            }
+          },
+          {
+            "name": "batch_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter to requests created in a specific batch.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of results per page. Max is 100.",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI outbound requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiOutboundRequestListResponse"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Trigger an AI outbound contact",
+        "description": "Trigger an AI outbound contact flow (SMS today) for a single client. Intake is synchronous \u2014 Oliver validates the request, resolves the target client, and runs suppression checks before responding. The actual outreach is dispatched asynchronously; the final outcome is delivered to your `callback_url` webhook (if provided) and is always available via `GET /ai_outbound/requests/{id}`.\n\nA suppressed request is **not** an error: it returns `200 OK` with `status: \"suppressed\"` and a `suppression_reason`. Only malformed or unresolvable input returns a `400`.\n\nProvide at least one of `client_id` or `contact_number` to identify the target. Set `partner_request_id` to make the call idempotent \u2014 re-submitting the same value returns the existing request instead of creating a new one.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The AI outbound contact to trigger",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAiOutboundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Request accepted and queued for dispatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiOutboundRequest"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Request suppressed, or an existing request returned for a duplicate `partner_request_id`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiOutboundRequest"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request \u2014 invalid channel/purpose, missing target, or the client could not be resolved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests \u2014 the per-practice rate limit (120/minute) was exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/open_api/v1/ai_outbound/requests/{id}": {
+      "get": {
+        "summary": "Get an AI outbound request",
+        "description": "Fetch a single AI outbound request by its Oliver `id` or by the `partner_request_id` you supplied when creating it.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The Oliver request id, or the `partner_request_id` supplied at creation.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The AI outbound request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiOutboundRequest"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {},
@@ -2099,7 +2414,11 @@
           "status": {
             "type": "string",
             "description": "Appointment status override. If omitted, the clinic's auto-accept setting determines the status.",
-            "enum": ["REQUESTED", "ACCEPTED", "CONFIRMED"]
+            "enum": [
+              "REQUESTED",
+              "ACCEPTED",
+              "CONFIRMED"
+            ]
           }
         }
       },
@@ -2141,7 +2460,15 @@
               "status": {
                 "type": "string",
                 "description": "The appointment status",
-                "enum": ["REQUESTED", "ACCEPTED", "CONFIRMED", "IN_PROGRESS", "DONE", "DELETED", "DECLINED"]
+                "enum": [
+                  "REQUESTED",
+                  "ACCEPTED",
+                  "CONFIRMED",
+                  "IN_PROGRESS",
+                  "DONE",
+                  "DELETED",
+                  "DECLINED"
+                ]
               },
               "booking_date": {
                 "type": "string",
@@ -2778,6 +3105,205 @@
             "type": "string",
             "format": "date-time",
             "description": "A reference timestamp for the task in ISO 8601 format"
+          }
+        }
+      },
+      "AiOutboundRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Oliver's unique identifier for the request."
+          },
+          "partner_request_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The idempotency key you supplied, if any."
+          },
+          "batch_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Identifier of the batch this request belongs to, if it was created as part of one."
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "sms",
+              "voice"
+            ],
+            "description": "The outreach channel. `sms` is currently supported."
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "scheduling",
+              "callback_followup",
+              "refill",
+              "general"
+            ],
+            "description": "The reason for the outreach, which shapes the AI opener."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "queued",
+              "in_progress",
+              "completed",
+              "suppressed",
+              "failed"
+            ],
+            "description": "Lifecycle status. `queued` \u2192 `in_progress` \u2192 one of the terminal states `completed`, `suppressed`, `failed`."
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "booked",
+              "opted_out",
+              "no_response",
+              "undeliverable"
+            ],
+            "description": "Set once a `completed` request reaches a resolution."
+          },
+          "suppression_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Why the request was suppressed, when `status` is `suppressed`. E.g. `recent_contact`, `active_conversation`, `sms_opted_out`, `voice_not_supported`."
+          },
+          "error_message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Failure detail, when `status` is `failed`."
+          },
+          "client_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Oliver's identifier for the resolved client."
+          },
+          "patient_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Oliver's identifier for the resolved patient, if one was provided or matched."
+          },
+          "contact_number": {
+            "type": "string",
+            "nullable": true,
+            "description": "The contact number as you submitted it."
+          },
+          "context": {
+            "type": "string",
+            "nullable": true,
+            "description": "The free-text context you supplied to guide the outreach."
+          },
+          "contacted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the first outbound message was sent, in ISO 8601 format."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the request reached a terminal status, in ISO 8601 format."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request was created, in ISO 8601 format."
+          }
+        }
+      },
+      "CreateAiOutboundRequest": {
+        "type": "object",
+        "required": [
+          "purpose"
+        ],
+        "description": "At least one of `client_id` or `contact_number` must be provided to identify the target client.",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "scheduling",
+              "callback_followup",
+              "refill",
+              "general"
+            ],
+            "description": "The reason for the outreach. Required."
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "sms",
+              "voice"
+            ],
+            "default": "sms",
+            "description": "The outreach channel. Defaults to `sms`."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Oliver's identifier for the target client. Provide this or `contact_number`."
+          },
+          "contact_number": {
+            "type": "string",
+            "description": "The client's phone number in E.164 or local format. Provide this or `client_id`."
+          },
+          "client_name": {
+            "type": "string",
+            "description": "Client name used to disambiguate when a `contact_number` is shared across multiple client records (e.g. a household)."
+          },
+          "patient_id": {
+            "type": "string",
+            "description": "Oliver's identifier for the patient the outreach concerns, if applicable."
+          },
+          "patient_name": {
+            "type": "string",
+            "description": "Patient name, used to match a patient within the resolved client."
+          },
+          "context": {
+            "type": "string",
+            "description": "Free-text context that guides the AI opener (e.g. \"overdue for annual wellness exam\")."
+          },
+          "partner_request_id": {
+            "type": "string",
+            "description": "Your idempotency key. Re-submitting the same value returns the existing request instead of creating a new one."
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "HTTPS URL that receives the outcome webhook when the request reaches a terminal status. Must begin with `https://`."
+          }
+        }
+      },
+      "AiOutboundRequestListResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_pages",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "array",
+            "description": "An array of AI outbound requests",
+            "items": {
+              "$ref": "#/components/schemas/AiOutboundRequest"
+            }
           }
         }
       }
