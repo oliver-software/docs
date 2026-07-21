@@ -1941,7 +1941,7 @@
       },
       "post": {
         "summary": "Trigger an AI outbound contact",
-        "description": "Trigger an AI outbound contact flow (SMS today) for a single client. Intake is synchronous \u2014 Oliver validates the request, resolves the target client, and runs suppression checks before responding. The actual outreach is dispatched asynchronously; the final outcome is delivered to your `callback_url` webhook, if provided.\n\nA suppressed request is **not** an error: it returns `200 OK` with `status: \"suppressed\"` and a `suppression_reason`. Only malformed or unresolvable input returns a `400`.\n\nProvide at least one of `client_id` or `contact_number` to identify the target. Set `partner_request_id` to make the call idempotent \u2014 re-submitting the same value returns the existing request instead of creating a new one.",
+        "description": "Trigger an AI outbound contact flow (SMS today) for a single client. Intake is synchronous \u2014 Oliver validates the request, resolves the target client, and runs suppression checks before responding. The actual outreach is dispatched asynchronously; the final outcome is delivered to your `callback_url` webhook, if provided.\n\nA suppressed request is **not** an error: it returns `200 OK` with `status: \"suppressed\"` and a `suppression_reason`. Only malformed or unresolvable input returns a `400`.\n\nIdentify the target with `contact_number` (always required); optionally supply `client_id` to resolve the client directly. Set `partner_request_id` to make the call idempotent \u2014 re-submitting the same value returns the existing request instead of creating a new one.",
         "parameters": [
           {
             "name": "X-Client-Id",

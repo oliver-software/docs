@@ -7,7 +7,7 @@ The AI Outbound API lets a partner ask Oliver to reach out to a specific client 
 
 ## How it works
 
-1. **Trigger** — POST a request to [`/ai_outbound/requests`](/api-reference/ai_outbound/create) identifying the client (by `client_id` or `contact_number`) and the `purpose` of the outreach.
+1. **Trigger** — POST a request to [`/ai_outbound/requests`](/api-reference/ai_outbound/create) identifying the client by `contact_number` (required, optionally with `client_id`) and the `purpose` of the outreach.
 2. **Synchronous intake** — Oliver validates the input, resolves the client, and runs suppression checks before responding. A queued request returns `201`; a suppressed request returns `200` with a `suppression_reason`.
 3. **Asynchronous dispatch** — Oliver composes an opener and starts the conversation. The request moves through `queued` → `in_progress`.
 4. **Outcome** — when the conversation resolves, the request reaches a terminal status (`completed`, `suppressed`, or `failed`). If you supplied a `callback_url`, Oliver delivers an [outcome webhook](/api-reference/ai_outbound/outcome_webhook); the outcome is also available anytime via [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show).
