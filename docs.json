@@ -76,6 +76,13 @@
             ]
           },
           {
+            "group": "Phone Calls Endpoints",
+            "pages": [
+              "api-reference/phone_calls/index",
+              "api-reference/phone_calls/show"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder"

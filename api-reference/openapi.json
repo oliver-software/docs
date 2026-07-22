@@ -2143,6 +2143,357 @@
           }
         }
       }
+    },
+    "/services/core/open_api/v1/phone_calls": {
+      "get": {
+        "description": "List AI voice agent call records for a practice. Returns JSON by default; pass format=csv for a CSV batch download with the same rows.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "description": "Only return calls created on or after this date, inclusive. Interpreted as a whole day in the practice timezone.",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-04-01"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "description": "Only return calls created on or before this date, inclusive. Interpreted as a whole day in the practice timezone.",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-04-30"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Filter by call direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "inbound",
+                "outbound"
+              ]
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "description": "Filter by the call's lifecycle state.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "queued",
+                "ringing",
+                "in_progress",
+                "completed",
+                "failed",
+                "no_answer",
+                "busy",
+                "voicemail",
+                "canceled"
+              ]
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "description": "Filter by call outcome. Repeat the parameter (outcome[]=a&outcome[]=b) to match any of several outcomes.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "appointment_booked",
+                  "appointment_rescheduled",
+                  "appointment_confirmed",
+                  "appointment_canceled",
+                  "callback_requested",
+                  "declined",
+                  "do_not_call",
+                  "no_answer",
+                  "voicemail",
+                  "forwarded",
+                  "transferred",
+                  "quick_abandoned",
+                  "abandoned",
+                  "abandoned_after_transfer",
+                  "dropped",
+                  "transfer_completed",
+                  "transfer_no_human",
+                  "transfer_caller_abandoned",
+                  "task_created",
+                  "resolved"
+                ]
+              }
+            }
+          },
+          {
+            "name": "call_classification",
+            "in": "query",
+            "required": false,
+            "description": "Filter by the AI's classification of why the caller called.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "scheduling",
+                "prescription_refill",
+                "medical_question",
+                "billing",
+                "records_request",
+                "emergency",
+                "callback",
+                "general_inquiry",
+                "price_shopping",
+                "other"
+              ]
+            }
+          },
+          {
+            "name": "booking_intent",
+            "in": "query",
+            "required": false,
+            "description": "Filter to calls where the caller did (true) or did not (false) want to book or change an appointment. See the endpoint page for how this is derived.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "description": "Only return calls matched to this Oliver client.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number (0-based)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of results per page. JSON: default 50, max 100. CSV: default 1000, max 5000.",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Set to 'csv' to download the same rows as a CSV attachment instead of JSON. Sending 'Accept: text/csv' has the same effect.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone calls response. Returns JSON by default, or a CSV attachment when format=csv. The CSV response also carries X-Total-Count, X-Page (0-based), X-Per-Page and X-Total-Pages headers so a wide date range can be paged through without guessing.",
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total number of matching calls (CSV responses only)",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Page": {
+                "description": "Current page number, 0-based (CSV responses only)",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Per-Page": {
+                "description": "Number of rows in this CSV page (CSV responses only)",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Total-Pages": {
+                "description": "Total number of CSV pages (CSV responses only)",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PhoneCallListResponse"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "example": "Date,Practice,Direction,Status,Caller Type,Client,Patient,Phone Number,Intent,Booking Intent,Summary,Sentiment,Outcome,Booked,Duration\n2026-04-10 13:00,Alpha Veterinary Clinic,inbound,completed,new,Dana Reed,Rufus,+15125550123,Scheduling,Yes,Booked a wellness exam,Happy,Appointment booked,Yes,2:05\n"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request \u2014 an unrecognized filter value or a malformed date was supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/open_api/v1/phone_calls/{id}": {
+      "get": {
+        "description": "Get a single phone call record by ID.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "description": "The location id of the practice",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the phone call",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone call found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PhoneCall"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {},
@@ -3294,6 +3645,227 @@
             "items": {
               "$ref": "#/components/schemas/AiOutboundRequest"
             }
+          }
+        }
+      },
+      "PhoneCallListResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_pages",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page number (0-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "Number of results per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "description": "Total number of pages"
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total number of matching calls"
+          },
+          "content": {
+            "type": "array",
+            "description": "An array of phone calls",
+            "items": {
+              "$ref": "#/components/schemas/PhoneCall"
+            }
+          }
+        }
+      },
+      "PhoneCall": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the call"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date/time the call started, in ISO 8601 format (UTC)"
+          },
+          "practice_name": {
+            "type": "string",
+            "description": "The name of the practice the call belongs to"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "Whether the call was received from or placed to the caller"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "ringing",
+              "in_progress",
+              "completed",
+              "failed",
+              "no_answer",
+              "busy",
+              "voicemail",
+              "canceled"
+            ],
+            "description": "The call's lifecycle state"
+          },
+          "caller_type": {
+            "type": "string",
+            "enum": [
+              "new",
+              "existing",
+              "unknown"
+            ],
+            "description": "'existing' if the matched client (or one of their patients) had a visit before this call, 'new' if the caller matched a client with no prior visit, 'unknown' if the call was never matched to a client."
+          },
+          "client_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The Oliver client matched to this call, if any"
+          },
+          "remote_client_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The matched client's id in the practice management system, qualified with the practice's server id when it has one"
+          },
+          "client_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The matched client's full name"
+          },
+          "patient_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The patient discussed on the call, if any"
+          },
+          "remote_patient_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The patient's id in the practice management system, qualified with the practice's server id when it has one"
+          },
+          "patient_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The patient's name"
+          },
+          "phone_number": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The caller's phone number in E.164 format"
+          },
+          "call_classification": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "scheduling",
+              "prescription_refill",
+              "medical_question",
+              "billing",
+              "records_request",
+              "emergency",
+              "callback",
+              "general_inquiry",
+              "price_shopping",
+              "other",
+              null
+            ],
+            "description": "The AI's classification of why the caller called"
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The AI's one-line summary of the call"
+          },
+          "customer_sentiment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "happy",
+              "neutral",
+              "unhappy",
+              "unknown",
+              null
+            ],
+            "description": "Caller sentiment detected from the transcript"
+          },
+          "outcome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "appointment_booked",
+              "appointment_rescheduled",
+              "appointment_confirmed",
+              "appointment_canceled",
+              "callback_requested",
+              "declined",
+              "do_not_call",
+              "no_answer",
+              "voicemail",
+              "forwarded",
+              "transferred",
+              "quick_abandoned",
+              "abandoned",
+              "abandoned_after_transfer",
+              "dropped",
+              "transfer_completed",
+              "transfer_no_human",
+              "transfer_caller_abandoned",
+              "task_created",
+              "resolved",
+              null
+            ],
+            "description": "How the call ended"
+          },
+          "booked": {
+            "type": "boolean",
+            "description": "True when the call ended in a scheduling outcome (appointment_booked, appointment_rescheduled, appointment_confirmed)"
+          },
+          "booking_intent": {
+            "type": "boolean",
+            "description": "True when the caller wanted to book or change an appointment \u2014 the call was classified as scheduling, ended in a scheduling outcome, or the AI invoked a scheduling tool during the call. Derived at read time, so it is populated for historical calls."
+          },
+          "duration_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Call duration in seconds"
           }
         }
       }

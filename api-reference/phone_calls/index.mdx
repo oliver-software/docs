@@ -1,0 +1,66 @@
+---
+title: 'List Phone Calls'
+openapi: 'GET /services/core/open_api/v1/phone_calls'
+---
+
+Batch access to AI voice agent call records for a single practice, for pulling into your own
+analytics. Returns JSON by default, or a CSV batch download with `format=csv`.
+
+<Note>
+  Archived calls **are** included. Archiving is an internal Oliver UI concept and does not remove
+  rows from a partner pull.
+</Note>
+
+## Filtering
+
+Dates are `YYYY-MM-DD` and inclusive on both ends — `start_date=2026-04-01&end_date=2026-04-30`
+returns the whole month. Any other date format returns a `400`.
+
+Unknown values for `direction`, `state`, or `call_classification` return a `400` rather than
+silently matching nothing. Pass `outcome` more than once (`outcome[]=appointment_booked&outcome[]=task_created`)
+to match any of several outcomes.
+
+## Field definitions
+
+- **`caller_type`** — `existing` if the matched client (or one of their patients) had a visit before
+  this call, `new` if the caller matched a client with no prior visit, `unknown` if the call was
+  never matched to a client.
+- **`booked`** — the call *ended* in a scheduling outcome (`appointment_booked`,
+  `appointment_rescheduled`, `appointment_confirmed`).
+- **`booking_intent`** — the caller *wanted* to book or change an appointment. True when any of:
+  the call was classified as `scheduling`, the outcome was a scheduling outcome, or the AI invoked a
+  scheduling tool (book, reschedule, cancel, or confirm an appointment) during the call. The last
+  two conditions catch calls the classifier filed under a different intent. It is derived at read
+  time, so it is populated for historical calls too.
+- **`summary`** — the AI's one-line summary of the call.
+- **`remote_client_id`** / **`remote_patient_id`** — the client's and patient's ids in your practice
+  management system, qualified with the practice's server id when it has one. These are the same
+  values returned by the appointments endpoints, so records line up across both.
+
+## CSV download
+
+Add `format=csv` (or send `Accept: text/csv`) to get the same rows as a CSV attachment:
+
+```bash
+curl -L 'https://partner-api.getoliver.com/services/core/open_api/v1/phone_calls?start_date=2026-04-01&end_date=2026-04-30&format=csv&per_page=5000' \
+  -H 'Authorization: Bearer <token>' \
+  -H 'X-Client-Id: <location id>' \
+  -o phone_calls_april.csv
+```
+
+Columns are:
+
+```
+Date, Practice, Direction, Status, Caller Type, Client, Patient, Phone Number,
+Intent, Booking Intent, Summary, Sentiment, Outcome, Booked, Duration
+```
+
+`Date` is rendered in the practice timezone as `YYYY-MM-DD HH:MM`, `Duration` as `m:ss`, and the
+yes/no columns as `Yes`/`No`.
+
+<Tip>
+  CSV pages are larger than JSON pages — `per_page` defaults to 1000 and allows up to 5000. The
+  paging metadata comes back in response headers (`X-Total-Count`, `X-Page`, `X-Per-Page`,
+  `X-Total-Pages`) so you can page through a wide date range without guessing how many pages there
+  are. `page` is zero-based in both formats.
+</Tip>
