@@ -3222,11 +3222,10 @@
           "channel": {
             "type": "string",
             "enum": [
-              "sms",
-              "voice"
+              "sms"
             ],
             "default": "sms",
-            "description": "The outreach channel. Defaults to `sms`."
+            "description": "The outreach channel. Only `sms` is currently supported."
           },
           "client_id": {
             "type": "string",
