@@ -56,7 +56,10 @@ Intent, Booking Intent, Summary, Sentiment, Outcome, Booked, Duration
 ```
 
 `Date` is rendered in the practice timezone as `YYYY-MM-DD HH:MM`, `Duration` as `m:ss`, and the
-yes/no columns as `Yes`/`No`.
+yes/no columns as `Yes`/`No`. The `Intent`, `Sentiment`, and `Outcome` columns contain humanized
+labels of the JSON enum values — `Scheduling` for `call_classification: scheduling`,
+`Appointment booked` for `outcome: appointment_booked`, and so on — so lowercase and replace
+spaces with underscores to map a CSV value back to its JSON enum.
 
 <Tip>
   CSV pages are larger than JSON pages — `per_page` defaults to 1000 and allows up to 5000. The
