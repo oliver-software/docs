@@ -2369,6 +2369,40 @@
                       "type": "string"
                     }
                   }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "page": 0,
+                    "per_page": 50,
+                    "total_pages": 3,
+                    "total_count": 122,
+                    "content": [
+                      {
+                        "id": "5f0f4ca5-9e4a-44ad-b26e-cf13cb1bf922",
+                        "created_at": "2026-04-10T18:00:00Z",
+                        "practice_name": "Alpha Veterinary Clinic",
+                        "direction": "inbound",
+                        "state": "completed",
+                        "caller_type": "new",
+                        "client_id": "8a4b1c2d-3e5f-4a6b-8c7d-9e0f1a2b3c4d",
+                        "remote_client_id": "1234-56",
+                        "client_name": "Dana Reed",
+                        "patient_id": "b7c8d9e0-f1a2-4b3c-8d5e-6f7a8b9c0d1e",
+                        "remote_patient_id": "7890-56",
+                        "patient_name": "Rufus",
+                        "phone_number": "+15125550123",
+                        "call_classification": "scheduling",
+                        "summary": "Booked a wellness exam",
+                        "customer_sentiment": "happy",
+                        "outcome": "appointment_booked",
+                        "booked": true,
+                        "booking_intent": true,
+                        "duration_seconds": 125
+                      }
+                    ]
+                  },
+                  "message": null
                 }
               },
               "text/csv": {
@@ -2458,6 +2492,32 @@
                       "type": "string"
                     }
                   }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "5f0f4ca5-9e4a-44ad-b26e-cf13cb1bf922",
+                    "created_at": "2026-04-10T18:00:00Z",
+                    "practice_name": "Alpha Veterinary Clinic",
+                    "direction": "inbound",
+                    "state": "completed",
+                    "caller_type": "new",
+                    "client_id": "8a4b1c2d-3e5f-4a6b-8c7d-9e0f1a2b3c4d",
+                    "remote_client_id": "1234-56",
+                    "client_name": "Dana Reed",
+                    "patient_id": "b7c8d9e0-f1a2-4b3c-8d5e-6f7a8b9c0d1e",
+                    "remote_patient_id": "7890-56",
+                    "patient_name": "Rufus",
+                    "phone_number": "+15125550123",
+                    "call_classification": "scheduling",
+                    "summary": "Booked a wellness exam",
+                    "customer_sentiment": "happy",
+                    "outcome": "appointment_booked",
+                    "booked": true,
+                    "booking_intent": true,
+                    "duration_seconds": 125
+                  },
+                  "message": null
                 }
               }
             }
