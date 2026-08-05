@@ -10,7 +10,9 @@ The AI Outbound API lets a partner ask Oliver to reach out to a specific client 
 1. **Trigger** — POST a request to [`/ai_outbound/requests`](/api-reference/ai_outbound/create) identifying the client by `contact_number` (required, optionally with `client_id`) and the `purpose` of the outreach.
 2. **Synchronous intake** — Oliver validates the input, resolves the client, and runs suppression checks before responding. A queued request returns `201`; a suppressed request returns `200` with a `suppression_reason`.
 3. **Asynchronous dispatch** — Oliver composes an opener and starts the conversation. The request moves through `queued` → `in_progress`.
-4. **Outcome** — when the conversation resolves, the request reaches a terminal status (`completed`, `suppressed`, or `failed`). If you supplied a `callback_url`, Oliver delivers an [outcome webhook](/api-reference/ai_outbound/outcome_webhook); the outcome is also available anytime via [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show).
+4. **Outcome** — when the conversation resolves, the request reaches a terminal status (`completed`, `suppressed`, or `failed`). If you supplied a `callback_url`, Oliver delivers exactly one [outcome webhook](/api-reference/ai_outbound/outcome_webhook) — on any of the three terminal statuses, not only when an `outcome` is set. The outcome is also available anytime via [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show).
+
+Outreach is a single AI-composed opener followed by a reply-driven conversation — Oliver sends no automated follow-up texts.
 
 ## Purposes
 
@@ -27,16 +29,26 @@ A request moves through a linear lifecycle:
 
 `received` → `queued` → `in_progress` → one of `completed`, `suppressed`, `failed`
 
-When a request is `completed`, its `outcome` is one of `booked`, `opted_out`, `no_response`, or `undeliverable`.
+When a request is `completed`, its `outcome` is one of `booked`, `opted_out`, or `no_response`. A `failed` request carries `undeliverable` when the text bounced at the carrier, and a null `outcome` with an `error_message` when dispatch never completed. A `suppressed` request has no `outcome` — it has a `suppression_reason`.
+
+### Timing
+
+| Transition | When |
+| --- | --- |
+| `no_response` | 48 hours of silence after the initial outbound text (no reply, booking, or opt-out). |
+| Reply received | The conversation stays live; the same 48-hour silence window applies from the last message. |
+| Backstop close-out | 96 hours after creation, a sweeper closes any request that is still non-terminal. |
 
 ## Suppression
 
-Suppression is a normal, auditable outcome — not an error. Oliver will suppress a request (returning `200` with a `suppression_reason`) when contacting the client would be inappropriate, for example:
+Suppression is a normal, auditable outcome — not an error. Oliver will suppress a request when contacting the client would be inappropriate, for example:
 
-- `recent_contact` — the client was already contacted within the recent-contact window.
-- `active_conversation` — there is already an open conversation with the client.
+- `recent_contact` — Oliver already contacted the client (by SMS or AI phone call, from any campaign) within the last 72 hours.
+- `active_conversation` — there is already an open AI conversation with the client.
 - `sms_opted_out` — the client has opted out of SMS.
 - `voice_not_supported` — the `voice` channel is not yet available.
+
+Suppression detected at intake returns `200` with the `suppression_reason` on the response. Eligibility is also re-checked just before the message is sent, so a request accepted with `201` can still end up `suppressed` — see the [outcome webhook](/api-reference/ai_outbound/outcome_webhook#suppressed-requests) for the full list of reasons.
 
 ## Idempotency
 

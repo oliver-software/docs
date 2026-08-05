@@ -3561,17 +3561,17 @@
               "no_response",
               "undeliverable"
             ],
-            "description": "Set once a `completed` request reaches a resolution."
+            "description": "The resolution. `booked`, `opted_out`, or `no_response` on a `completed` request; `undeliverable` on a `failed` request whose text bounced. Null while the request is in flight, and on a suppressed request. `no_response` is set after 48 hours of silence following the initial outbound text."
           },
           "suppression_reason": {
             "type": "string",
             "nullable": true,
-            "description": "Why the request was suppressed, when `status` is `suppressed`. E.g. `recent_contact`, `active_conversation`, `sms_opted_out`, `voice_not_supported`."
+            "description": "Why the request was suppressed, when `status` is `suppressed`. Intake reasons are `recent_contact`, `active_conversation`, `sms_opted_out`, `voice_not_supported`; send-time re-checks may also return `notifications_disabled`, `client_inactive`, `recent_or_upcoming_appointment`, `pet_deceased`, or `stopped`."
           },
           "error_message": {
             "type": "string",
             "nullable": true,
-            "description": "Failure detail, when `status` is `failed`."
+            "description": "Failure detail, when `status` is `failed` (e.g. the carrier rejected the number, or dispatch did not complete within 96 hours)."
           },
           "client_id": {
             "type": "string",
@@ -3673,7 +3673,7 @@
           "callback_url": {
             "type": "string",
             "format": "uri",
-            "description": "HTTPS URL that receives the outcome webhook when the request reaches a terminal status. Must begin with `https://`."
+            "description": "HTTPS URL that receives the outcome webhook when the request reaches a terminal status (`completed`, `suppressed`, or `failed`). Exactly one webhook is delivered per request. Must begin with `https://`."
           }
         }
       },
