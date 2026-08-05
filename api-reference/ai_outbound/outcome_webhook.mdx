@@ -9,9 +9,57 @@ When you trigger an [AI outbound contact](/api-reference/ai_outbound/create) wit
 
 The outcome is also always available by polling [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show) — the webhook simply lets you close the loop without polling.
 
+## When the webhook fires
+
+The webhook fires **once per request, on any terminal event** — not only when `outcome` is set. Every accepted request ends in exactly one of the three events below, so every request with a `callback_url` produces exactly one webhook.
+
+| Event | Fires when | `outcome` | Other fields |
+| --- | --- | --- | --- |
+| `ai_outbound.completed` | The conversation resolved. | `booked`, `opted_out`, or `no_response` | `outcome_detail.appointment_id` on `booked` |
+| `ai_outbound.suppressed` | Oliver declined to send the outreach. | `null` | `suppression_reason` is set |
+| `ai_outbound.failed` | The outreach could not be delivered, or dispatch never completed. | `undeliverable` (the text bounced) or `null` (dispatch failure) | `error_message` is set |
+
 <Note>
-  Suppressed requests still fire an outcome webhook. A suppression is a legitimate terminal outcome (for example, the client was contacted too recently), not an error.
+  A suppression is a legitimate terminal outcome (for example, the client was contacted too recently), not an error — so it still fires a webhook. Because `outcome` stays `null` on a suppressed request, branch your handler on `status` (or `event`) rather than on the presence of `outcome`.
 </Note>
+
+### Suppressed requests
+
+Suppression can happen at two points:
+
+1. **At intake**, before Oliver responds to your `POST`. The create call returns `200` with `status: "suppressed"` and the `suppression_reason` already populated, and the webhook is dispatched immediately afterward. If you handle the synchronous response, this webhook is confirmation rather than news.
+2. **At dispatch or send time**, after the request was accepted with `201`. Eligibility is re-checked just before the message goes out, so a request queued minutes earlier can still be suppressed — for example, the client opted out, or another AI conversation opened in the meantime.
+
+Common `suppression_reason` values:
+
+| Reason | Meaning |
+| --- | --- |
+| `recent_contact` | The client was already contacted by Oliver — by SMS or AI phone call, from any campaign — within the last 72 hours. |
+| `active_conversation` | An AI SMS conversation with this client is already open. |
+| `sms_opted_out` | The client has opted out of SMS. |
+| `voice_not_supported` | `channel: "voice"` was requested; voice dispatch is not yet available. |
+| `notifications_disabled` | The client has automated notifications turned off. |
+| `client_inactive` | The client record went inactive after the request was accepted. |
+| `recent_or_upcoming_appointment` | `scheduling` requests only — the client already has a recent or upcoming appointment. |
+| `pet_deceased` | The client told us in a live thread that the pet has died, so Oliver stopped the conversation. |
+| `stopped` | The conversation was stopped for another reason, such as clinic staff taking it over manually. |
+
+Treat this list as open-ended: new gates may add reasons, so handle an unrecognized `suppression_reason` gracefully.
+
+### Failed requests
+
+`ai_outbound.failed` covers two cases, distinguished by `outcome`:
+
+- `outcome: "undeliverable"` — the carrier reported that the number cannot receive SMS (for example, a landline). This is not an opt-out; the client never made a choice.
+- `outcome: null` — dispatch never completed. `error_message` explains why, e.g. `"dispatch did not complete within 96 hours"`.
+
+### Timing: when does `no_response` fire?
+
+`no_response` is reported after **48 hours of silence following the initial outbound text** — no reply, no booking, no opt-out. API-triggered outreach sends a single opener and is then reply-driven (there are no automated follow-up messages), so the clock starts at `contacted_at`.
+
+If the client does reply, the conversation stays live and the request resolves on its own merits — `booked`, `opted_out`, or `no_response` once the thread has been quiet for the same 48-hour window.
+
+A backstop sweeper closes out any request that has not reached a terminal status **96 hours** after creation (the 48-hour send window plus the 48-hour conversation grace, with margin). When that sweeper has to close a request that never got as far as sending, the result is `ai_outbound.failed` with an `error_message`, not `no_response`.
 
 ## Payload Structure
 
@@ -46,15 +94,15 @@ The webhook payload is sent as a JSON object with the following structure:
 </ResponseField>
 
 <ResponseField name="outcome" type="string">
-  For a `completed` request, the resolution. One of `booked`, `opted_out`, `no_response`, `undeliverable`.
+  The resolution. `booked`, `opted_out`, or `no_response` on a `completed` request; `undeliverable` on a `failed` request whose text bounced. `null` on a suppressed request, and on a failure that never reached the carrier.
 </ResponseField>
 
-<ResponseField name="outcome_detail" type="string">
-  Optional additional detail about the outcome, when available.
+<ResponseField name="outcome_detail" type="object">
+  Additional structured detail about the outcome, when available. On a `booked` outcome this is `{ "appointment_id": "..." }`, identifying the appointment Oliver booked. `null` otherwise.
 </ResponseField>
 
 <ResponseField name="suppression_reason" type="string">
-  Why the request was suppressed, when `status` is `suppressed`. E.g. `recent_contact`, `active_conversation`, `sms_opted_out`, `voice_not_supported`.
+  Why the request was suppressed, when `status` is `suppressed`. See [Suppressed requests](#suppressed-requests) for the values.
 </ResponseField>
 
 <ResponseField name="error_message" type="string">
@@ -70,7 +118,7 @@ The webhook payload is sent as a JSON object with the following structure:
 </ResponseField>
 
 <ResponseField name="contacted_at" type="string">
-  When the first outbound message was sent, in ISO 8601 format. Null if the client was never contacted (e.g. suppressed).
+  When the first outbound message was sent, in ISO 8601 format. Null if the client was never contacted (e.g. suppressed at intake).
 </ResponseField>
 
 <ResponseField name="completed_at" type="string" required>
@@ -81,9 +129,11 @@ The webhook payload is sent as a JSON object with the following structure:
   When the webhook was sent, in ISO 8601 format.
 </ResponseField>
 
-## Example Payload
+## Example Payloads
 
-```json
+<CodeGroup>
+
+```json Completed (booked)
 {
   "event": "ai_outbound.completed",
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -93,7 +143,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "purpose": "scheduling",
   "status": "completed",
   "outcome": "booked",
-  "outcome_detail": null,
+  "outcome_detail": { "appointment_id": "d4e5f6a7-b8c9-0123-def1-234567890123" },
   "suppression_reason": null,
   "error_message": null,
   "client_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
@@ -103,6 +153,71 @@ The webhook payload is sent as a JSON object with the following structure:
   "timestamp": "2026-07-20T14:19:53Z"
 }
 ```
+
+```json Completed (no response)
+{
+  "event": "ai_outbound.completed",
+  "request_id": "660e8400-e29b-41d4-a716-446655440111",
+  "partner_request_id": "partner-abc-124",
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "channel": "sms",
+  "purpose": "refill",
+  "status": "completed",
+  "outcome": "no_response",
+  "outcome_detail": null,
+  "suppression_reason": null,
+  "error_message": null,
+  "client_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "patient_id": null,
+  "contacted_at": "2026-07-20T14:03:11Z",
+  "completed_at": "2026-07-22T14:04:02Z",
+  "timestamp": "2026-07-22T14:04:03Z"
+}
+```
+
+```json Suppressed
+{
+  "event": "ai_outbound.suppressed",
+  "request_id": "770e8400-e29b-41d4-a716-446655440222",
+  "partner_request_id": "partner-abc-125",
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "channel": "sms",
+  "purpose": "scheduling",
+  "status": "suppressed",
+  "outcome": null,
+  "outcome_detail": null,
+  "suppression_reason": "recent_contact",
+  "error_message": null,
+  "client_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "patient_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+  "contacted_at": null,
+  "completed_at": "2026-07-20T14:03:09Z",
+  "timestamp": "2026-07-20T14:03:10Z"
+}
+```
+
+```json Failed
+{
+  "event": "ai_outbound.failed",
+  "request_id": "880e8400-e29b-41d4-a716-446655440333",
+  "partner_request_id": "partner-abc-126",
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "channel": "sms",
+  "purpose": "callback_followup",
+  "status": "failed",
+  "outcome": "undeliverable",
+  "outcome_detail": null,
+  "suppression_reason": null,
+  "error_message": "carrier reported the number cannot receive SMS",
+  "client_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "patient_id": null,
+  "contacted_at": "2026-07-20T14:03:11Z",
+  "completed_at": "2026-07-20T14:03:44Z",
+  "timestamp": "2026-07-20T14:03:45Z"
+}
+```
+
+</CodeGroup>
 
 ## Verifying Webhook Signatures
 
@@ -150,6 +265,8 @@ function verifyWebhookSignature(payload, signature, secret) {
 
 ## Delivery and Retries
 
-- Webhooks are delivered by an HTTP POST with a `Content-Type: application/json` body.
-- Respond with a `200 OK` status code to acknowledge receipt. Process asynchronously if needed to avoid timeouts.
-- If your endpoint does not respond successfully, Oliver retries delivery up to 3 times with exponential backoff before marking the webhook as failed.
+- Webhooks are delivered by an HTTP POST with a `Content-Type: application/json` body and a `User-Agent` of `Oliver-AiOutbound/1.0`.
+- Your `callback_url` must be `https://`. Oliver verifies the TLS certificate and allows 10 seconds for a response.
+- Respond with a `2xx` status code to acknowledge receipt. Process asynchronously if needed to avoid timeouts.
+- If your endpoint does not respond successfully, Oliver retries up to 3 attempts in total with exponential backoff (2s, then 4s) before marking the webhook as failed. A failed webhook is not retried afterward — fall back to [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show) to recover the outcome.
+- An hourly reconciliation job re-sends any webhook that was enqueued but never delivered (for example, if delivery was interrupted). Delivery is therefore at-least-once in that narrow window, so make your handler idempotent — de-duplicate on `request_id`.
