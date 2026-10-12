@@ -36,6 +36,35 @@ to match any of several outcomes.
 - **`remote_client_id`** / **`remote_patient_id`** — the client's and patient's ids in your practice
   management system, qualified with the practice's server id when it has one. These are the same
   values returned by the appointments endpoints, so records line up across both.
+- **`started_at`** / **`ended_at`** — when the call connected and when it ended. `created_at` is
+  when Oliver first recorded the call, which can be a moment earlier than `started_at`.
+
+## Transfers
+
+When the AI hands a caller to staff, these fields describe the **most recent** transfer attempt.
+They are all `null` if the call was never transferred.
+
+- **`transferred_at`** — when the AI started the transfer.
+- **`transfer_outcome`** — `answered`, `no_answer`, `busy` or `failed`.
+- **`transfer_reason`** — the AI's reason for the transfer, in its own words.
+- **`transfer_type`** — whether the caller asked for a person (`caller_requested`, or
+  `immediate_caller_requested` when they asked straight away) or Oliver decided to transfer
+  (`agent_initiated_urgent`, `agent_initiated_topic`, `specialty`, `agent_failed_to_resolve`,
+  `system_error`, `group_router`).
+- **`transfer_dial_duration_seconds`** — how long the caller was connected to staff once they
+  answered.
+
+If staff don't pick up, the AI can try again, and each retry overwrites the fields above.
+**`transfer_attempts`** keeps every attempt, oldest first, with the line that was dialed:
+
+```json
+"transfer_attempts": [
+  { "attempted_at": "2026-04-10T18:01:00Z", "destination_label": "Front Desk",
+    "destination_number": "+15125550100", "destination_extension": null },
+  { "attempted_at": "2026-04-10T18:01:40Z", "destination_label": "Urgent line",
+    "destination_number": "+15125550199", "destination_extension": "12" }
+]
+```
 
 ## CSV download
 
@@ -52,11 +81,16 @@ Columns are:
 
 ```
 Date, Practice, Direction, Status, Caller Type, Client, Patient, Phone Number,
-Intent, Booking Intent, Summary, Sentiment, Outcome, Booked, Duration
+Intent, Booking Intent, Summary, Sentiment, Outcome, Booked, Duration,
+Started At, Ended At, Transferred At, Transfer Outcome, Transfer Reason, Transfer Type,
+Transfer Dial Duration, Transfer Destinations
 ```
 
-`Date` is rendered in the practice timezone as `YYYY-MM-DD HH:MM`, `Duration` as `m:ss`, and the
-yes/no columns as `Yes`/`No`. The `Intent`, `Sentiment`, and `Outcome` columns contain humanized
+`Date` and the other timestamps are rendered in the practice timezone as `YYYY-MM-DD HH:MM`,
+durations as `m:ss`, and the yes/no columns as `Yes`/`No`. `Transfer Destinations` lists every
+attempt in order as `Label (number xextension)`, separated by `; `.
+
+The `Intent`, `Sentiment`, `Outcome`, `Transfer Outcome` and `Transfer Type` columns contain humanized
 labels of the JSON enum values — `Scheduling` for `call_classification: scheduling`,
 `Appointment booked` for `outcome: appointment_booked`, and so on — so lowercase and replace
 spaces with underscores to map a CSV value back to its JSON enum.

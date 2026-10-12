@@ -2398,7 +2398,15 @@
                         "outcome": "appointment_booked",
                         "booked": true,
                         "booking_intent": true,
-                        "duration_seconds": 125
+                        "duration_seconds": 125,
+                        "started_at": "2026-04-10T18:00:02Z",
+                        "ended_at": "2026-04-10T18:02:07Z",
+                        "transferred_at": null,
+                        "transfer_outcome": null,
+                        "transfer_reason": null,
+                        "transfer_type": null,
+                        "transfer_dial_duration_seconds": null,
+                        "transfer_attempts": []
                       }
                     ]
                   },
@@ -2515,7 +2523,15 @@
                     "outcome": "appointment_booked",
                     "booked": true,
                     "booking_intent": true,
-                    "duration_seconds": 125
+                    "duration_seconds": 125,
+                    "started_at": "2026-04-10T18:00:02Z",
+                    "ended_at": "2026-04-10T18:02:07Z",
+                    "transferred_at": null,
+                    "transfer_outcome": null,
+                    "transfer_reason": null,
+                    "transfer_type": null,
+                    "transfer_dial_duration_seconds": null,
+                    "transfer_attempts": []
                   },
                   "message": null
                 }
@@ -3753,7 +3769,7 @@
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "description": "The date/time the call started, in ISO 8601 format (UTC)"
+            "description": "When Oliver first recorded the call, in ISO 8601 format (UTC). Can be slightly earlier than started_at."
           },
           "practice_name": {
             "type": "string",
@@ -3926,6 +3942,111 @@
               "null"
             ],
             "description": "Call duration in seconds"
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the call connected, in ISO 8601 format (UTC)"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the call ended, in ISO 8601 format (UTC)"
+          },
+          "transferred_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the AI started the most recent transfer to staff, in ISO 8601 format (UTC). Null if the call was never transferred."
+          },
+          "transfer_outcome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "answered",
+              "no_answer",
+              "busy",
+              "failed",
+              null
+            ],
+            "description": "How the most recent transfer attempt ended. Null if the call was never transferred."
+          },
+          "transfer_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The AI's free-text reason for the most recent transfer"
+          },
+          "transfer_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "caller_requested",
+              "immediate_caller_requested",
+              "agent_initiated_urgent",
+              "agent_initiated_topic",
+              "specialty",
+              "agent_failed_to_resolve",
+              "system_error",
+              "group_router",
+              null
+            ],
+            "description": "Why the call was transferred: the caller asked for a person (caller_requested, or immediate_caller_requested when they asked straight away) or Oliver decided to (agent_initiated_urgent, agent_initiated_topic, specialty, agent_failed_to_resolve, system_error, group_router)"
+          },
+          "transfer_dial_duration_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "How long the caller was connected to staff after the most recent transfer was answered, in seconds"
+          },
+          "transfer_attempts": {
+            "type": "array",
+            "description": "Every transfer attempt on the call, oldest first. Empty if the call was never transferred. The transfer_* fields above describe only the last of these.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attempted_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When this attempt started, in ISO 8601 format (UTC)"
+                },
+                "destination_label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The practice's name for the line dialed, e.g. Front Desk or Urgent line"
+                },
+                "destination_number": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The number dialed, in E.164 format"
+                },
+                "destination_extension": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The extension dialed, if any"
+                }
+              }
+            }
           }
         }
       }
