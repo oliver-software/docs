@@ -86,10 +86,19 @@
             ]
           },
           {
+            "group": "Messages Endpoints",
+            "pages": [
+              "api-reference/messages/overview",
+              "api-reference/messages/create",
+              "api-reference/messages/show"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder",
-              "api-reference/ai_outbound/outcome_webhook"
+              "api-reference/ai_outbound/outcome_webhook",
+              "api-reference/messages/status_webhook"
             ]
           }
         ]

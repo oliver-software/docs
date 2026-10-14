@@ -1,0 +1,109 @@
+---
+title: 'Message Status Webhook'
+description: 'Receive delivery updates for a message you sent'
+---
+
+## Overview
+
+When you [send a message](/api-reference/messages/create) with a `callback_url`, Oliver POSTs to that URL each time the message's status changes. The current status is also always available from [`GET /messages/{id}`](/api-reference/messages/show).
+
+## When the webhook fires
+
+| Event | Fires when |
+| --- | --- |
+| `message.sent` | The message was handed to the carrier. |
+| `message.delivered` | It reached the client's phone. |
+| `message.read` | The client opened it (RCS only). |
+| `message.failed` | It couldn't be delivered. `error_code` and `error_message` say why. |
+| `message.suppressed` | It was not sent because the client opted out (`status_reason: "opted_out"`) or the number can't receive texts (`blocked_number`). Your create call already returned this status; the webhook confirms it. |
+
+Each status is sent once, in order. If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or past one you already handled as a no-op.
+
+## Payload
+
+The body is the [message object](/api-reference/messages/show) plus these fields:
+
+<ResponseField name="event" type="string" required>
+  `message.{status}`, e.g. `message.delivered`.
+</ResponseField>
+
+<ResponseField name="event_id" type="string" required>
+  Unique per delivery. Use it to de-duplicate.
+</ResponseField>
+
+<ResponseField name="reference_id" type="string">
+  The `reference_id` you supplied when sending, if any.
+</ResponseField>
+
+<ResponseField name="channel_used" type="string">
+  `rcs` or `sms`: how the client got the message. Can be null on `message.sent` with `channel: "auto"`, before the carrier reports it.
+</ResponseField>
+
+<ResponseField name="clinic_id" type="string" required>
+  The practice the message was sent for.
+</ResponseField>
+
+<ResponseField name="occurred_at" type="string" required>
+  When the status changed (ISO 8601).
+</ResponseField>
+
+<CodeGroup>
+
+```json Delivered
+{
+  "event": "message.delivered",
+  "event_id": "5f0c2d1e-8a4b-4c3d-9e2f-1a2b3c4d5e6f",
+  "id": "9a1b2c3d-4e5f-6789-abcd-ef0123456789",
+  "reference_id": "inv-reminder-88412",
+  "status": "delivered",
+  "status_reason": null,
+  "channel_requested": "auto",
+  "channel_used": "rcs",
+  "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11",
+  "error_code": null,
+  "error_message": null,
+  "sent_at": "2026-10-15T14:00:02Z",
+  "delivered_at": "2026-10-15T14:00:05Z",
+  "read_at": null,
+  "failed_at": null,
+  "created_at": "2026-10-15T14:00:01Z",
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "occurred_at": "2026-10-15T14:00:05Z",
+  "timestamp": "2026-10-15T14:00:06Z"
+}
+```
+
+```json Failed
+{
+  "event": "message.failed",
+  "event_id": "6a1d3e2f-9b5c-4d4e-8f3a-2b3c4d5e6f70",
+  "id": "9a1b2c3d-4e5f-6789-abcd-ef0123456789",
+  "reference_id": "inv-reminder-88412",
+  "status": "failed",
+  "status_reason": "delivery_failed",
+  "channel_requested": "auto",
+  "channel_used": "sms",
+  "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11",
+  "error_code": "30006",
+  "error_message": "Landline or unreachable carrier",
+  "sent_at": "2026-10-15T14:00:02Z",
+  "failed_at": "2026-10-15T14:00:09Z",
+  "created_at": "2026-10-15T14:00:01Z",
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "occurred_at": "2026-10-15T14:00:09Z",
+  "timestamp": "2026-10-15T14:00:10Z"
+}
+```
+
+</CodeGroup>
+
+## Verifying Webhook Signatures
+
+Signatures work the same way as the [AI outbound outcome webhook](/api-reference/ai_outbound/outcome_webhook#verifying-webhook-signatures) and use the same practice secret. When it's configured, each request carries `X-Webhook-Signature`: the HMAC-SHA256 hex digest of the raw request body. Verify it with a constant-time comparison before processing the payload.
+
+## Delivery and Retries
+
+- Webhooks are an HTTP POST with a `Content-Type: application/json` body and a `User-Agent` of `Oliver-Messages/1.0`.
+- Your `callback_url` must be `https://`. Oliver verifies the TLS certificate and allows 10 seconds for a response.
+- Respond with a `2xx` status code to acknowledge receipt.
+- If your endpoint doesn't respond successfully, Oliver makes up to 3 attempts in total (waiting 2s, then 4s). After that the status isn't retried on its own, but the next status change sends the latest status. Use [`GET /messages/{id}`](/api-reference/messages/show) to catch up.
