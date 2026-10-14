@@ -2574,7 +2574,7 @@
     "/services/core/open_api/v1/messages": {
       "post": {
         "summary": "Send a message",
-        "description": "Send one message to a client: rich RCS content (a card, carousel, image, or text with suggested replies and actions) with SMS fallback text, which is required. The message appears in the practice's Oliver inbox like any other text, and clients who opted out are never texted.\n\nOutside the practice's sending hours (8am to 9pm clinic time) the message is held and sent at 8am. A held message returns `201` with `status: \"scheduled\"`.\n\nAn opted-out recipient is not an error: it returns `200` with `status: \"suppressed\"`. Invalid input returns `400` with every offending field in `data.errors`.",
+        "description": "Send one message to a client: rich RCS content (a card, carousel, image, or text with suggested replies and actions) with SMS fallback text, which is required. The message appears in the practice's Oliver inbox like any other text, and clients who opted out are never texted.\n\nMessages are sent immediately, never queued. Send only during the practice's sending hours, 8am to 9pm clinic time; outside them the request returns `400` and nothing is sent.\n\nAn opted-out recipient is not an error: it returns `200` with `status: \"suppressed\"`. Invalid input returns `400` with every problem in `data.errors`. If the messaging provider is briefly unavailable you get `502`; retry with the same `reference_id`.",
         "parameters": [
           {
             "name": "X-Client-Id",
@@ -2598,7 +2598,7 @@
         },
         "responses": {
           "201": {
-            "description": "Sent, or held until the practice's sending hours",
+            "description": "Sent",
             "content": {
               "application/json": {
                 "schema": {
@@ -2650,7 +2650,7 @@
             }
           },
           "400": {
-            "description": "Bad Request: lists every invalid field",
+            "description": "Bad Request: invalid input (every invalid field is listed), outside the practice's sending hours, `channel: \"rcs\"` at a practice without RCS, or content the messaging provider rejected. Nothing was sent.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2671,6 +2671,16 @@
           },
           "429": {
             "description": "Too Many Requests: the per-practice rate limit (120/minute) was exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway: the messaging provider was briefly unavailable and nothing was confirmed sent. Retry with the same `reference_id`; Oliver won't text the client twice.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4397,18 +4407,13 @@
           },
           "reference_id": {
             "type": "string",
-            "description": "Your id for this message. Echoed in every response and webhook, and unique per practice: re-sending the same `reference_id` returns the existing message instead of texting again, so retries are safe.",
+            "description": "Your id for this message. Echoed in every response and webhook, and unique per practice: re-sending the same `reference_id` returns the existing message instead of texting again, so retries are safe. A refused request (`400`) stores nothing, so you can fix it and reuse the `reference_id`.",
             "example": "inv-reminder-88412"
           },
           "callback_url": {
             "type": "string",
             "format": "uri",
             "description": "An https URL that receives a [status webhook](/api-reference/messages/status_webhook) on each status change."
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Don't send after this time. Messages sent outside the practice's sending hours wait until 8am clinic time; if that is after `expires_at`, the message is dropped as `expired`."
           }
         }
       },
@@ -4426,19 +4431,17 @@
           "status": {
             "type": "string",
             "enum": [
-              "scheduled",
               "sent",
               "delivered",
               "read",
               "failed",
-              "suppressed",
-              "expired"
+              "suppressed"
             ]
           },
           "status_reason": {
             "type": "string",
             "nullable": true,
-            "description": "Why a message is `scheduled` (`quiet_hours`), `suppressed` (`opted_out`, `blocked_number`), `expired` or `failed`."
+            "description": "Why a message is `suppressed` (`opted_out`, `blocked_number`) or `failed`."
           },
           "channel_requested": {
             "type": "string",
@@ -4468,16 +4471,6 @@
           },
           "error_message": {
             "type": "string",
-            "nullable": true
-          },
-          "scheduled_for": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "sent_at": {
@@ -4537,7 +4530,9 @@
                   "properties": {
                     "field": {
                       "type": "string",
-                      "example": "content.card.buttons"
+                      "example": "content.card.buttons",
+                      "nullable": true,
+                      "description": "The offending field, or null for a request-level error such as sending outside the practice's sending hours."
                     },
                     "message": {
                       "type": "string",

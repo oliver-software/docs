@@ -15,10 +15,7 @@ When you [send a message](/api-reference/messages/create) with a `callback_url`,
 | `message.delivered` | It reached the client's phone. |
 | `message.read` | The client opened it (RCS only). |
 | `message.failed` | It couldn't be delivered. `error_code` and `error_message` say why. |
-| `message.suppressed` | It was not sent because the client opted out (`status_reason: "opted_out"`) or the number can't receive texts (`blocked_number`). |
-| `message.expired` | It was held for the practice's sending hours and `expires_at` passed first. |
-
-A message held for sending hours (`scheduled`) doesn't fire a webhook; your create call already returned that status.
+| `message.suppressed` | It was not sent because the client opted out (`status_reason: "opted_out"`) or the number can't receive texts (`blocked_number`). Your create call already returned this status; the webhook confirms it. |
 
 Each status is sent once, in order. If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or past one you already handled as a no-op.
 
@@ -65,8 +62,6 @@ The body is the [message object](/api-reference/messages/show) plus these fields
   "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11",
   "error_code": null,
   "error_message": null,
-  "scheduled_for": null,
-  "expires_at": null,
   "sent_at": "2026-10-15T14:00:02Z",
   "delivered_at": "2026-10-15T14:00:05Z",
   "read_at": null,

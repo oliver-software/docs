@@ -162,27 +162,48 @@ Invalid content returns `400` with every offending field:
 
 | Status | Meaning |
 | --- | --- |
-| `scheduled` | Held until the practice's sending hours open (`status_reason: "quiet_hours"`), or briefly waiting to retry. |
 | `sent` | Handed to the carrier. |
 | `delivered` | Reached the client's phone. |
 | `read` | The client opened it (RCS only). |
 | `failed` | Couldn't be delivered; see `error_code` and `error_message`. |
 | `suppressed` | Not sent because the client opted out of texts (`opted_out`) or the number can't receive them (`blocked_number`). |
-| `expired` | `expires_at` passed before the message could be sent. |
 
 Statuses only move forward. A message that falls back from RCS to SMS can report a delivery error for the RCS attempt and still end `delivered`.
 
 ## Sending hours
 
-Oliver texts clients between 8am and 9pm clinic time, the same window as the practice's own reminders. A message sent outside those hours returns `201` with `status: "scheduled"` and `scheduled_for`, and goes out at 8am. If a message is time-sensitive, set `expires_at`: a held message that would go out after it is dropped as `expired`.
+Messages are sent immediately; Oliver doesn't queue them for later. Send during the practice's sending hours, **8am to 9pm clinic time**, the same window as the practice's own reminders. Outside them the request returns `400` and nothing is sent:
+
+```json
+{
+  "success": false,
+  "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours.",
+  "data": {
+    "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours.",
+    "errors": [{ "field": null, "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours." }]
+  }
+}
+```
+
+## Errors that mean nothing was sent
+
+| Response | Cause | What to do |
+| --- | --- | --- |
+| `400`, field `channel` | `channel: "rcs"` at a practice whose RCS sender isn't live yet | Use `auto` (RCS when possible, else SMS) or `sms`. |
+| `400`, field `recipient` | The number can't receive texts | Check the number. |
+| `400`, field `content` | The messaging provider rejected the content, e.g. an image URL it couldn't fetch | Fix the content. |
+| `400`, field `null` | Outside sending hours | Send during sending hours. |
+| `502` | The messaging provider was briefly unavailable | Retry with the same `reference_id`. |
+
+A `400` stores nothing, so you can fix the request and reuse its `reference_id`.
 
 ## Opt-outs
 
-Clients who replied STOP are never texted. If the opt-out is already known when you send, the response is `200` with `status: "suppressed"`. Some opt-outs are only detected at send time, so a `scheduled` message can still end `suppressed`.
+Clients who replied STOP are never texted. The response is `200` with `status: "suppressed"` and no text is sent.
 
 ## Idempotency
 
-Set `reference_id` to a unique value per message. Re-sending the same `reference_id` returns the existing message instead of texting the client again, so retries are safe. `reference_id` is echoed in every response and webhook.
+Set `reference_id` to a unique value per message. Re-sending the same `reference_id` returns the existing message instead of texting the client again, so retries are safe, including after a `502` or a timeout. `reference_id` is echoed in every response and webhook.
 
 ## Rate limits
 
