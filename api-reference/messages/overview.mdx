@@ -1,0 +1,189 @@
+---
+title: 'Messages Overview'
+description: 'Send a client a rich RCS message, with SMS fallback'
+---
+
+The Messages API sends one text to a client on the practice's behalf. On phones that support RCS, the client sees the practice's name, logo and verified badge, plus rich content: cards with images and buttons, carousels, and reply chips. Every message also carries plain `fallback_text`, which Oliver sends as an SMS when RCS isn't available.
+
+Messages appear in the practice's Oliver inbox like any other text, so staff see what was sent and can pick up the client's reply.
+
+## How it works
+
+1. **Send**: POST to [`/messages`](/api-reference/messages/create) with a `recipient`, the `fallback_text` and the `content`.
+2. **Delivery**: with `channel: "auto"` (the default), Oliver sends RCS when the practice's RCS sender is live and the client's phone supports it, and `fallback_text` as an SMS otherwise. The client gets one or the other, never both.
+3. **Status**: follow the message through `sent` → `delivered` → `read` (RCS only) with [`GET /messages/{id}`](/api-reference/messages/show), or pass a `callback_url` to get a [status webhook](/api-reference/messages/status_webhook) on each change.
+
+<Note>
+  An RCS message is either a text bubble or a card, never both. To open with a sentence like "Hi! Millie has preventive care coming due", put it in the card's `description`.
+</Note>
+
+## Content types
+
+<CodeGroup>
+
+```json Card
+{
+  "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+  "reference_id": "inv-reminder-88412",
+  "fallback_text": "Hi! Millie has preventive care due October 21-22. Book here: https://vet.example.com/book or call us at (512) 555-0100.",
+  "callback_url": "https://partner.example.com/oliver/messages",
+  "content": {
+    "type": "card",
+    "card": {
+      "title": "Millie's upcoming care",
+      "description": "Hi! Millie has preventive care coming due October 21-22: Bordetella vaccine, physical exam and ProHeart 6 injection.",
+      "media_url": "https://cdn.example.com/millie-reminder.png",
+      "buttons": [
+        { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
+        { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
+      ]
+    },
+    "suggestions": [{ "type": "reply", "text": "I have a question" }]
+  }
+}
+```
+
+```json Carousel
+{
+  "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+  "fallback_text": "Millie, Rex and Luna have care coming due. Book here: https://vet.example.com/book",
+  "content": {
+    "type": "carousel",
+    "cards": [
+      { "title": "Millie", "description": "Bordetella vaccine, due Oct 21", "media_url": "https://cdn.example.com/millie.png",
+        "buttons": [{ "type": "open_url", "text": "Book Millie", "url": "https://vet.example.com/book?pet=millie" }] },
+      { "title": "Rex", "description": "Annual exam, due Oct 28", "media_url": "https://cdn.example.com/rex.png",
+        "buttons": [{ "type": "open_url", "text": "Book Rex", "url": "https://vet.example.com/book?pet=rex" }] },
+      { "title": "Luna", "description": "Rabies vaccine, due Nov 2", "media_url": "https://cdn.example.com/luna.png",
+        "buttons": [{ "type": "open_url", "text": "Book Luna", "url": "https://vet.example.com/book?pet=luna" }] }
+    ]
+  }
+}
+```
+
+```json Text with suggested replies
+{
+  "recipient": { "phone_number": "+15125551234" },
+  "fallback_text": "Millie is due for her Bordetella vaccine. Would you like us to call you to book? Reply YES or NO.",
+  "content": {
+    "type": "text",
+    "suggestions": [
+      { "type": "reply", "text": "Yes, call me" },
+      { "type": "reply", "text": "Not now" },
+      { "type": "open_url", "text": "Book online", "url": "https://vet.example.com/book" }
+    ]
+  }
+}
+```
+
+```json Image
+{
+  "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+  "fallback_text": "Happy 5th birthday, Millie! From all of us at Your Veterinary Clinic.",
+  "content": { "type": "media", "media_url": "https://cdn.example.com/millie-birthday.png" }
+}
+```
+
+```json SMS only
+{
+  "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+  "channel": "sms",
+  "fallback_text": "Reminder: Millie is due for her Bordetella vaccine. Book here: https://vet.example.com/book"
+}
+```
+
+</CodeGroup>
+
+### Sending with cURL
+
+```bash
+curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/messages \
+  -H "Authorization: Bearer $OLIVER_TOKEN" \
+  -H "X-Client-Id: $PRACTICE_ID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+    "reference_id": "inv-reminder-88412",
+    "fallback_text": "Hi! Millie has preventive care due October 21-22. Book here: https://vet.example.com/book",
+    "content": {
+      "type": "card",
+      "card": {
+        "title": "Millie'\''s upcoming care",
+        "description": "Bordetella vaccine, physical exam and ProHeart 6 injection.",
+        "media_url": "https://cdn.example.com/millie-reminder.png",
+        "buttons": [
+          { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
+          { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
+        ]
+      }
+    }
+  }'
+```
+
+## Buttons and suggestions
+
+| `type` | What it does | Also needs |
+| --- | --- | --- |
+| `open_url` | Opens a web page | `url` (https) |
+| `dial` | Calls a number | `phone_number` (E.164, e.g. `+15125550100`) |
+| `reply` | Sends its text back as the client's reply, which lands in the practice inbox | optional `id` |
+
+Calendar and share-location actions aren't supported by our RCS provider; requests that use them return `400`.
+
+## Limits
+
+| Item | Limit |
+| --- | --- |
+| Buttons per card | 4 |
+| Suggestions per message | 11 |
+| Cards in a carousel | 2 to 10 |
+| Card title | 200 characters |
+| Card description | 1,600 characters |
+| Button text | 25 characters (20 for `reply`) |
+| `fallback_text` | 1,600 characters |
+
+Invalid content returns `400` with every offending field:
+
+```json
+{
+  "success": false,
+  "message": "content.card.buttons must have at most 4 items",
+  "data": {
+    "message": "content.card.buttons must have at most 4 items",
+    "errors": [
+      { "field": "content.card.buttons", "message": "must have at most 4 items" },
+      { "field": "fallback_text", "message": "is required" }
+    ]
+  }
+}
+```
+
+## Statuses
+
+| Status | Meaning |
+| --- | --- |
+| `scheduled` | Held until the practice's sending hours open (`status_reason: "quiet_hours"`), or briefly waiting to retry. |
+| `sent` | Handed to the carrier. |
+| `delivered` | Reached the client's phone. |
+| `read` | The client opened it (RCS only). |
+| `failed` | Couldn't be delivered; see `error_code` and `error_message`. |
+| `suppressed` | Not sent because the client opted out of texts (`opted_out`) or the number can't receive them (`blocked_number`). |
+| `expired` | `expires_at` passed before the message could be sent. |
+
+Statuses only move forward. A message that falls back from RCS to SMS can report a delivery error for the RCS attempt and still end `delivered`.
+
+## Sending hours
+
+Oliver texts clients between 8am and 9pm clinic time, the same window as the practice's own reminders. A message sent outside those hours returns `201` with `status: "scheduled"` and `scheduled_for`, and goes out at 8am. If a message is time-sensitive, set `expires_at`: a held message that would go out after it is dropped as `expired`.
+
+## Opt-outs
+
+Clients who replied STOP are never texted. If the opt-out is already known when you send, the response is `200` with `status: "suppressed"`. Some opt-outs are only detected at send time, so a `scheduled` message can still end `suppressed`.
+
+## Idempotency
+
+Set `reference_id` to a unique value per message. Re-sending the same `reference_id` returns the existing message instead of texting the client again, so retries are safe. `reference_id` is echoed in every response and webhook.
+
+## Rate limits
+
+Each practice is limited to **120 messages per minute**. Exceeding the limit returns `429 Too Many Requests`.
