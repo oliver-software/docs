@@ -34,8 +34,7 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
       "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'll combine them into one visit when possible.",
       "media_url": "https://cdn.example.com/millie-reminder.png",
       "buttons": [
-        { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
-        { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
+        { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }
       ]
     }
   }
@@ -107,14 +106,17 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/message
     "content": {
       "type": "card",
       "card": {
-        "title": "Millie'\''s upcoming care",
-        "description": "Bordetella vaccine, physical exam and ProHeart 6 injection.",
+        "title": "Millie'\''s care is due Oct 21-22",
+        "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'\''ll combine them into one visit when possible.",
         "media_url": "https://cdn.example.com/millie-reminder.png",
         "buttons": [
-          { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
-          { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
+          { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }
         ]
-      }
+      },
+      "suggestions": [
+        { "type": "reply", "text": "Book for me" },
+        { "type": "reply", "text": "Call me back" }
+      ]
     }
   }'
 ```
@@ -126,6 +128,8 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/message
 | `open_url` | Opens a web page | `url` (https) |
 | `dial` | Calls a number | `phone_number` (E.164, e.g. `+15125550100`) |
 | `reply` | Sends its text back as the client's reply, which lands in the practice inbox | optional `id` |
+
+Card `buttons` show on the card. `suggestions` show after the message, as a list of taps on iPhone and a row of chips on Android.
 
 Calendar and share-location actions aren't supported by our RCS provider; requests that use them return `400`.
 
@@ -143,13 +147,51 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 
 ### Writing card text
 
-Phones show only the start of a card's `description`; the client taps the card to read the rest. On iPhone:
+Phones decide how RCS content looks; the API can't change it. What we saw on an iPhone in October 2026:
 
-- The description shows up to three lines, about 110 characters. Keep it to one short paragraph.
+**Card text**
+
+- The description shows up to three lines, about 110 characters, then a chevron the client taps to read the rest. Keep it to one short paragraph.
 - A line break ends the preview: everything after the first line break is hidden until the card is opened.
 - Put the most important fact, such as the due date, in the `title`.
-- Buttons appear under an "Options" menu on the card.
-- Use one image for every send; the date belongs in the text, not the image.
+- A plain `text` message shows in full, with no preview cut-off.
+
+<Frame caption="Top: the description has a line break, so only its first line shows. Bottom: one long paragraph shows three lines.">
+  <img src="/images/messages/iphone-card-text-preview.png" alt="Two cards on iPhone: one cut off at a line break, one showing three lines" style={{ maxWidth: '320px' }} />
+</Frame>
+
+
+**Buttons**
+
+- One link or dial button shows on the card as a tappable button.
+- Two or more link or dial buttons, of the same type or mixed, fold into an "Options" menu the client has to open. Give the card one main action and put the phone number in the text.
+- Reply suggestions show as separate taps under the message, up to the 4 we tried, whatever else the card has.
+- Under every message with buttons, iPhone adds a note: "*Practice name* will see actions you select". On a plain `text` message it sits between the link and the reply taps.
+
+The layout that kept every action one tap away: a card with an image, one link or dial button, and reply suggestions.
+
+<Frame caption="One link button and two reply suggestions: every action is one tap.">
+  <img src="/images/messages/iphone-card-one-link-replies.png" alt="Card with a Schedule now button and two reply taps below" style={{ maxWidth: '320px' }} />
+</Frame>
+
+<Frame caption="A link and a dial button fold into Options; the replies still show.">
+  <img src="/images/messages/iphone-card-options-replies.png" alt="Card with an Options menu and two reply taps below" style={{ maxWidth: '320px' }} />
+</Frame>
+
+<Frame caption="A plain text message with one link and two replies. The note sits between them.">
+  <img src="/images/messages/iphone-text-link-replies.png" alt="Text bubble with a Schedule now button, a note, then two reply taps" style={{ maxWidth: '320px' }} />
+</Frame>
+
+
+**Images and carousels**
+
+- Use one image for every send; the date belongs in the text, not the image. A 2:1 image (1440×720) showed uncropped.
+- A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Its `fallback_text` isn't shown as an intro line above the cards on iPhone, so put everything the client needs in the cards.
+
+<Frame caption="A two-card carousel: a stack with a 1 of 2 counter and one link per card.">
+  <img src="/images/messages/iphone-carousel.png" alt="Carousel of two cards on iPhone, first card showing a Schedule Millie button" style={{ maxWidth: '320px' }} />
+</Frame>
+
 
 Invalid content returns `400` with every offending field:
 
@@ -209,6 +251,8 @@ A `400` stores nothing, so you can fix the request and reuse its `reference_id`.
 ## Opt-outs
 
 Clients who replied STOP are never texted. The response is `200` with `status: "suppressed"` and no text is sent.
+
+The first message Oliver sends to a number at a practice ends with "Reply STOP at any time to unsubscribe." Oliver adds it to `fallback_text` when the message goes out as SMS, and to a plain `text` message without suggestions. Cards, carousels, images and text with suggestions never show it over RCS.
 
 ## Idempotency
 
