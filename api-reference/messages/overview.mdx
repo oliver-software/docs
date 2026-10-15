@@ -139,6 +139,7 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 | --- | --- |
 | Buttons per card | 4 |
 | Suggestions per message | 11 |
+| Replies per message (buttons and suggestions together) | 10 |
 | Cards in a carousel | 2 to 10 |
 | Card title | 200 characters |
 | Card description | 1,600 characters |
@@ -155,6 +156,8 @@ Phones decide how RCS content looks; the API can't change it. What we saw on an 
 - A line break ends the preview: everything after the first line break is hidden until the card is opened.
 - Put the most important fact, such as the due date, in the `title`.
 - A plain `text` message shows in full, with no preview cut-off.
+- A card with no `title` shows its text small and grey, so it's easy to miss. Put the call to action in the `title`.
+- An image sent as `media` shows `fallback_text` as a small grey caption under it, and a URL in that caption isn't tappable.
 
 <Frame caption="Top: the description has a line break, so only its first line shows. Bottom: one long paragraph shows three lines.">
   <img src="/images/messages/iphone-card-text-preview.png" alt="Two cards on iPhone: one cut off at a line break, one showing three lines" style={{ maxWidth: '320px' }} />
@@ -165,7 +168,7 @@ Phones decide how RCS content looks; the API can't change it. What we saw on an 
 
 - One link or dial button shows on the card as a tappable button.
 - Two or more link or dial buttons, of the same type or mixed, fold into an "Options" menu the client has to open. Give the card one main action and put the phone number in the text.
-- Reply suggestions show as separate taps under the message, up to the 4 we tried, whatever else the card has.
+- Reply suggestions show as separate taps under the message, all 10 when we sent the maximum, whatever else the card has. With replies only, iPhone shows no note under the message.
 - Under every message with buttons, iPhone adds a note: "*Practice name* will see actions you select". On a plain `text` message it sits between the link and the reply taps.
 
 The layout that kept every action one tap away: a card with an image, one link or dial button, and reply suggestions.
