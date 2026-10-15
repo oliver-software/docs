@@ -156,6 +156,11 @@ Phones decide how RCS content looks; the API can't change it. What we saw on an 
 - Put the most important fact, such as the due date, in the `title`.
 - A plain `text` message shows in full, with no preview cut-off.
 
+<Frame caption="Top: the description has a line break, so only its first line shows. Bottom: one long paragraph shows three lines.">
+  <img src="/images/messages/iphone-card-text-preview.png" alt="Two cards on iPhone: one cut off at a line break, one showing three lines" style={{ maxWidth: '320px' }} />
+</Frame>
+
+
 **Buttons**
 
 - One link or dial button shows on the card as a tappable button.
@@ -165,10 +170,28 @@ Phones decide how RCS content looks; the API can't change it. What we saw on an 
 
 The layout that kept every action one tap away: a card with an image, one link or dial button, and reply suggestions.
 
+<Frame caption="One link button and two reply suggestions: every action is one tap.">
+  <img src="/images/messages/iphone-card-one-link-replies.png" alt="Card with a Schedule now button and two reply taps below" style={{ maxWidth: '320px' }} />
+</Frame>
+
+<Frame caption="A link and a dial button fold into Options; the replies still show.">
+  <img src="/images/messages/iphone-card-options-replies.png" alt="Card with an Options menu and two reply taps below" style={{ maxWidth: '320px' }} />
+</Frame>
+
+<Frame caption="A plain text message with one link and two replies. The note sits between them.">
+  <img src="/images/messages/iphone-text-link-replies.png" alt="Text bubble with a Schedule now button, a note, then two reply taps" style={{ maxWidth: '320px' }} />
+</Frame>
+
+
 **Images and carousels**
 
 - Use one image for every send; the date belongs in the text, not the image. A 2:1 image (1440×720) showed uncropped.
 - A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Its `fallback_text` isn't shown as an intro line above the cards on iPhone, so put everything the client needs in the cards.
+
+<Frame caption="A two-card carousel: a stack with a 1 of 2 counter and one link per card.">
+  <img src="/images/messages/iphone-carousel.png" alt="Carousel of two cards on iPhone, first card showing a Schedule Millie button" style={{ maxWidth: '320px' }} />
+</Frame>
+
 
 Invalid content returns `400` with every offending field:
 
