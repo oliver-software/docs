@@ -14,7 +14,7 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
 3. **Status**: follow the message through `sent` → `delivered` → `read` (RCS only) with [`GET /messages/{id}`](/api-reference/messages/show), or pass a `callback_url` to get a [status webhook](/api-reference/messages/status_webhook) on each change.
 
 <Note>
-  An RCS message is either a text bubble or a card, never both. To open with a sentence like "Hi! Millie has preventive care coming due", put it in the card's `description`.
+  An RCS message is either a text bubble or a card, never both. Put the key facts in the card itself; see [Writing card text](#writing-card-text).
 </Note>
 
 ## Content types
@@ -30,15 +30,14 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
   "content": {
     "type": "card",
     "card": {
-      "title": "Millie's upcoming care",
-      "description": "Hi! Millie has preventive care coming due October 21-22: Bordetella vaccine, physical exam and ProHeart 6 injection.",
+      "title": "Millie's care is due Oct 21-22",
+      "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'll combine them into one visit when possible.",
       "media_url": "https://cdn.example.com/millie-reminder.png",
       "buttons": [
         { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
         { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
       ]
-    },
-    "suggestions": [{ "type": "reply", "text": "I have a question" }]
+    }
   }
 }
 ```
@@ -141,6 +140,16 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 | Card description | 1,600 characters |
 | Button text | 25 characters (20 for `reply`) |
 | `fallback_text` | 1,600 characters |
+
+### Writing card text
+
+Phones show only the start of a card's `description`; the client taps the card to read the rest. On iPhone:
+
+- The description shows up to three lines, about 110 characters. Keep it to one short paragraph.
+- A line break ends the preview: everything after the first line break is hidden until the card is opened.
+- Put the most important fact, such as the due date, in the `title`.
+- Buttons appear under an "Options" menu on the card.
+- Use one image for every send; the date belongs in the text, not the image.
 
 Invalid content returns `400` with every offending field:
 
