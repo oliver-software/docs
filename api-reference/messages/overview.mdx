@@ -142,13 +142,13 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 
 ### Writing card text
 
-Phones show only the start of a card's `description`; the client taps the card to read the rest. On iPhone:
+Phones show only the start of a card's `description`; the client taps the card to read the rest. What we saw on iPhone (iOS 26, October 2026):
 
 - The description shows up to three lines, about 110 characters. Keep it to one short paragraph.
 - A line break ends the preview: everything after the first line break is hidden until the card is opened.
 - Put the most important fact, such as the due date, in the `title`.
 - One link or dial button shows on the card as a tappable button. Two or more fold into an "Options" menu the client has to open, so give the card one main action and put the phone number in the text.
-- Reply buttons always show as their own tappable list under the card.
+- Reply buttons showed as separate tappable buttons under the card, including two at once (e.g. "Yes, confirm" and "No, cancel").
 - Use one image for every send; the date belongs in the text, not the image.
 
 Invalid content returns `400` with every offending field:
