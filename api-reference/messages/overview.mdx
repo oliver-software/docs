@@ -34,8 +34,7 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
       "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'll combine them into one visit when possible.",
       "media_url": "https://cdn.example.com/millie-reminder.png",
       "buttons": [
-        { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" },
-        { "type": "dial", "text": "Call clinic", "phone_number": "+15125550100" }
+        { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }
       ]
     }
   }
@@ -148,7 +147,8 @@ Phones show only the start of a card's `description`; the client taps the card t
 - The description shows up to three lines, about 110 characters. Keep it to one short paragraph.
 - A line break ends the preview: everything after the first line break is hidden until the card is opened.
 - Put the most important fact, such as the due date, in the `title`.
-- Buttons appear under an "Options" menu on the card.
+- One link or dial button shows on the card as a tappable button. Two or more fold into an "Options" menu the client has to open, so give the card one main action and put the phone number in the text.
+- Reply buttons always show as their own tappable list under the card.
 - Use one image for every send; the date belongs in the text, not the image.
 
 Invalid content returns `400` with every offending field:
