@@ -3749,7 +3749,7 @@
               "sms",
               "voice"
             ],
-            "description": "The outreach channel. `sms` is currently supported."
+            "description": "The outreach channel. `sms` covers SMS and RCS; `opener_channel` says which one the opener used."
           },
           "purpose": {
             "type": "string",
@@ -3866,7 +3866,7 @@
               "sms"
             ],
             "default": "sms",
-            "description": "The outreach channel. Only `sms` is currently supported."
+            "description": "The outreach channel. Only `sms` can be supplied here, which covers SMS and RCS, when available. To configure rich RCS content, see `content` below."
           },
           "client_id": {
             "type": "string",
