@@ -12,11 +12,11 @@ The AI Outbound API lets a partner ask Oliver to reach out to a specific client 
 3. **Asynchronous dispatch** — Oliver composes an opener and starts the conversation. The request moves through `queued` → `in_progress`.
 4. **Outcome** — when the conversation resolves, the request reaches a terminal status (`completed`, `suppressed`, or `failed`). If you supplied a `callback_url`, Oliver delivers exactly one [outcome webhook](/api-reference/ai_outbound/outcome_webhook) — on any of the three terminal statuses, not only when an `outcome` is set. The outcome is also available anytime via [`GET /ai_outbound/requests/{id}`](/api-reference/ai_outbound/show).
 
-Outreach is a single opener followed by a reply-driven conversation — Oliver sends no automated follow-up texts. The opener is your `fallback_text` or `initial_message_script` if you send one, otherwise Oliver writes it from the `purpose`, `context` and `patients`.
+Outreach is a single opener followed by a reply-driven conversation — Oliver sends no automated follow-up texts. The opener is your `initial_message_script` if you send one, otherwise Oliver writes it from the `purpose`, `context` and `patients`.
 
 ## Rich openers (RCS)
 
-Add `content` to open with a card, carousel, image or reply buttons. It takes the same shape and limits as the [messages endpoint](/api-reference/messages/overview). See [Writing card text](/api-reference/messages/overview#writing-card-text) for layouts that work on a phone. Clients whose phone supports RCS see the rich message, with the practice's name, logo and verified badge. Everyone else gets the plain-text opener. Either way, every reply, including a tap on a reply button, goes to Oliver's AI, which carries on the conversation and books the visit.
+Add `content` to open with a card, carousel, image or reply buttons. It takes the same shape and limits as the [messages endpoint](/api-reference/messages/overview). See [Writing card text](/api-reference/messages/overview#writing-card-text) for layouts that work on a phone. Clients whose phone supports RCS see the rich message, with the practice's name, logo and verified badge. Everyone else gets the plain-text opener as an SMS. Either way, every reply, including a tap on a reply button, goes to Oliver's AI, which carries on the conversation and books the visit.
 
 A service reminder for two pets, where a tap on **Let's find a time** starts booking:
 
@@ -46,13 +46,13 @@ A service reminder for two pets, where a tap on **Let's find a time** starts boo
       { "type": "reply", "text": "Afternoons work best", "id": "afternoons" }
     ]
   },
-  "fallback_text": "Hi Sarah, Bella's rabies vaccine is due Nov 3 and Max's annual exam Nov 10. Want me to find a time to see them together?",
+  "initial_message_script": "Hi Sarah, Bella's rabies vaccine is due Nov 3 and Max's annual exam Nov 10. Want me to find a time to see them together?",
   "callback_url": "https://partner.example.com/oliver/callback"
 }
 ```
 
 - `patients` tells the AI which pets the outreach is about and what each is due for, so one message covers the household.
-- For `content.type: "text"`, the bubble is the plain-text opener, so you can send only reply buttons and let Oliver write the line.
+- `initial_message_script` is the plain text: the SMS for phones without RCS, and the bubble of `content.type: "text"`. Leave it out and Oliver writes it, so you can send only reply buttons and let Oliver write the line.
 - `opener_channel` on the request and the outcome webhook says how the opener arrived: `rcs` or `sms`.
 - The clinic's opt-out line is added to the plain text and to the card's description.
 
