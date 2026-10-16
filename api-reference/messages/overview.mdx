@@ -166,54 +166,59 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 
 ### Writing card text
 
-Phones decide how RCS content looks; the API can't change it. What we saw on an iPhone in October 2026:
+Phones decide how RCS content looks; the API can't change it. These screenshots are from an iPhone, October 2026.
+
+**Layouts that work**
+
+<Columns cols={2}>
+  <Frame caption="One pet: the key fact in the title, a short note, and reply taps.">
+    <img src="/images/messages/rcs-reminder-card.png" alt="Card: Bella is due for her rabies vaccine, with three reply taps" />
+  </Frame>
+  <Frame caption="Several pets in one card. Through AI Outbound, the AI books them together.">
+    <img src="/images/messages/rcs-reminder-two-pets.png" alt="Card: Bella and Max are due for vaccines, with three reply taps" />
+  </Frame>
+  <Frame caption="A plain text message with reply taps. It shows in full.">
+    <img src="/images/messages/rcs-ai-opener.png" alt="Text: Max is due for his annual exam. Want me to find a time? with three reply taps" />
+  </Frame>
+  <Frame caption="One link button and two reply suggestions: every action is one tap.">
+    <img src="/images/messages/iphone-card-one-link-replies.png" alt="Card with a Schedule now button and two reply taps below" />
+  </Frame>
+</Columns>
+
+**Avoid**
+
+<Columns cols={2}>
+  <Frame caption="Two or more link or dial buttons fold into an Options menu the client has to open.">
+    <img src="/images/messages/iphone-card-options-replies.png" alt="Card with an Options menu and two reply taps below" />
+  </Frame>
+  <Frame caption="A line break ends the preview (top). One paragraph shows up to three lines (bottom).">
+    <img src="/images/messages/iphone-card-text-preview.png" alt="Two cards on iPhone: one cut off at a line break, one showing three lines" />
+  </Frame>
+</Columns>
 
 **Card text**
 
-- The description shows up to three lines, about 110 characters, then a chevron the client taps to read the rest. Keep it to one short paragraph.
-- A line break ends the preview: everything after the first line break is hidden until the card is opened.
-- Put the most important fact, such as the due date, in the `title`. A long title wraps in full; a 97-character title showed on three lines.
-- A plain `text` message shows in full, with no preview cut-off.
+- The description shows up to three lines, about 110 characters, then a chevron the client taps to read the rest. Keep it to one short paragraph with no line breaks.
+- Put the most important fact, such as the due date, in the `title`. A long title wraps in full.
 - A card with no `title` shows its text small and grey, so it's easy to miss. Put the call to action in the `title`.
+- A plain `text` message shows in full, with no preview cut-off.
 - An image sent as `media` shows `fallback_text` as a small grey caption under it, and a URL in that caption isn't tappable.
-
-<Frame caption="Top: the description has a line break, so only its first line shows. Bottom: one long paragraph shows three lines.">
-  <img src="/images/messages/iphone-card-text-preview.png" alt="Two cards on iPhone: one cut off at a line break, one showing three lines" style={{ maxWidth: '320px' }} />
-</Frame>
-
 
 **Buttons**
 
-- One link or dial button shows on the card as a tappable button.
-- Two or more link or dial buttons, of the same type or mixed, fold into an "Options" menu the client has to open. Give the card one main action and put the phone number in the text.
-- Reply suggestions show as separate taps under the message, all 10 when we sent the maximum, whatever else the card has. With replies only, iPhone shows no note under the message.
-- Under every message with buttons, iPhone adds a note: "*Practice name* will see actions you select". On a plain `text` message it sits between the link and the reply taps.
-
-The layout that kept every action one tap away: a card with an image, one link or dial button, and reply suggestions.
-
-<Frame caption="One link button and two reply suggestions: every action is one tap.">
-  <img src="/images/messages/iphone-card-one-link-replies.png" alt="Card with a Schedule now button and two reply taps below" style={{ maxWidth: '320px' }} />
-</Frame>
-
-<Frame caption="A link and a dial button fold into Options; the replies still show.">
-  <img src="/images/messages/iphone-card-options-replies.png" alt="Card with an Options menu and two reply taps below" style={{ maxWidth: '320px' }} />
-</Frame>
-
-<Frame caption="A plain text message with one link and two replies. The note sits between them.">
-  <img src="/images/messages/iphone-text-link-replies.png" alt="Text bubble with a Schedule now button, a note, then two reply taps" style={{ maxWidth: '320px' }} />
-</Frame>
-
+- One link or dial button shows on the card as a tappable button. Two or more fold into "Options", so give the card one main action and put the phone number in the text.
+- Reply suggestions show as separate taps under the message, up to 10, whatever else the card has.
+- Under a message with a link or dial button, iPhone adds a note: "*Practice name* will see actions you select". With replies only, there's no note.
 
 **Images and carousels**
 
 - Use one image for every send; the date belongs in the text, not the image. Wide (2:1), square (1:1) and tall (3:4) images all showed uncropped, at full card width; a tall image makes a tall card.
-- Each carousel card follows the button rules on its own: two link or dial buttons on a card fold into that card's "Options". A reply button on a carousel card shows as a tap under the carousel.
-- A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Its `fallback_text` isn't shown as an intro line above the cards on iPhone, so put everything the client needs in the cards.
+- A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Each card follows the button rules on its own, and a reply button on a card shows as a tap under the carousel.
+- A carousel's `fallback_text` isn't shown above the cards on iPhone, so put everything the client needs in the cards.
 
 <Frame caption="A two-card carousel: a stack with a 1 of 2 counter and one link per card.">
   <img src="/images/messages/iphone-carousel.png" alt="Carousel of two cards on iPhone, first card showing a Schedule Millie button" style={{ maxWidth: '320px' }} />
 </Frame>
-
 
 Invalid content returns `400` with every offending field:
 

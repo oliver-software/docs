@@ -16,9 +16,13 @@ Outreach is a single opener followed by a reply-driven conversation — Oliver s
 
 ## Rich openers (RCS)
 
-Add `content` to open with a card, carousel, image or reply buttons. It takes the same shape and limits as the [messages endpoint](/api-reference/messages/overview). Clients whose phone supports RCS see the rich message, with the practice's name, logo and verified badge. Everyone else gets the plain-text opener. Either way, every reply, including a tap on a reply button, goes to Oliver's AI, which carries on the conversation and books the visit.
+Add `content` to open with a card, carousel, image or reply buttons. It takes the same shape and limits as the [messages endpoint](/api-reference/messages/overview). See [Writing card text](/api-reference/messages/overview#writing-card-text) for layouts that work on a phone. Clients whose phone supports RCS see the rich message, with the practice's name, logo and verified badge. Everyone else gets the plain-text opener. Either way, every reply, including a tap on a reply button, goes to Oliver's AI, which carries on the conversation and books the visit.
 
-A service reminder for two pets, where a tap on **Book a time** starts booking:
+A service reminder for two pets, where a tap on **Let's find a time** starts booking:
+
+<Frame caption="On iPhone. The practice's opt-out line follows the description.">
+  <img src="/images/messages/rcs-reminder-two-pets.png" alt="Card: Bella and Max are due for vaccines, with three reply taps" style={{ maxWidth: '320px' }} />
+</Frame>
 
 ```json
 {
@@ -26,22 +30,23 @@ A service reminder for two pets, where a tap on **Book a time** starts booking:
   "purpose": "scheduling",
   "contact_number": "+15125550123",
   "patients": [
-    { "patient_name": "Bella", "services_due": [{ "name": "Rabies vaccine", "due_date": "2026-10-30" }] },
-    { "patient_name": "Max", "services_due": ["DHPP"] }
+    { "patient_name": "Bella", "services_due": [{ "name": "Rabies vaccine", "due_date": "2026-11-03" }] },
+    { "patient_name": "Max", "services_due": [{ "name": "Annual exam", "due_date": "2026-11-10" }] }
   ],
   "content": {
     "type": "card",
     "card": {
       "title": "Bella and Max are due for vaccines",
-      "description": "Book one visit for both before October 30.",
+      "description": "Bella's rabies is due Nov 3 and Max's annual exam Nov 10. We can see them together.",
       "media_url": "https://cdn.example.com/vaccine-reminder.png"
     },
     "suggestions": [
-      { "type": "reply", "text": "Book a time", "id": "book" },
-      { "type": "reply", "text": "Call me", "id": "call" }
+      { "type": "reply", "text": "Let's find a time", "id": "book" },
+      { "type": "reply", "text": "Mornings work best", "id": "mornings" },
+      { "type": "reply", "text": "Afternoons work best", "id": "afternoons" }
     ]
   },
-  "fallback_text": "Hi Sarah, Bella and Max are due for vaccines before October 30. Want me to find a time for both?",
+  "fallback_text": "Hi Sarah, Bella's rabies vaccine is due Nov 3 and Max's annual exam Nov 10. Want me to find a time to see them together?",
   "callback_url": "https://partner.example.com/oliver/callback"
 }
 ```

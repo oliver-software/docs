@@ -3907,7 +3907,7 @@
           },
           "content": {
             "$ref": "#/components/schemas/MessageContent",
-            "description": "Optional rich opener: a card, carousel, image or reply buttons, the same shape and limits as the [messages endpoint](/api-reference/messages/overview). Clients whose phone supports RCS see it; everyone else gets the plain-text opener. Every reply, including a reply-button tap, goes to Oliver's AI, which continues the conversation. For `type: text`, the text bubble is the plain-text opener. Requires `channel: sms`."
+            "description": "Optional rich opener: a card, carousel, image or reply buttons, the same shape and limits as the [messages endpoint](/api-reference/messages/overview). See [Writing card text](/api-reference/messages/overview#writing-card-text) for how each layout looks on a phone. Clients whose phone supports RCS see it; everyone else gets the plain-text opener. Every reply, including a reply-button tap, goes to Oliver's AI, which continues the conversation. For `type: text`, the text bubble is the plain-text opener. Requires `channel: sms`."
           },
           "fallback_text": {
             "type": "string",
