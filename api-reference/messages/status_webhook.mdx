@@ -17,7 +17,9 @@ When you [send a message](/api-reference/messages/create) with a `callback_url`,
 | `message.failed` | It couldn't be delivered. `error_code` and `error_message` say why. |
 | `message.suppressed` | It was not sent because the client opted out (`status_reason: "opted_out"`) or the number can't receive texts (`blocked_number`). Your create call already returned this status; the webhook confirms it. |
 
-Each status is sent once, in order. If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or past one you already handled as a no-op.
+Each status is sent once, in order: `sent` → `failed` → `delivered` → `read`, with `suppressed` final (see [Statuses](/api-reference/messages/overview#statuses)). If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or before one you already handled as a no-op.
+
+`message.failed` isn't always final: when RCS fails and the SMS fallback is delivered, `message.delivered` follows it.
 
 ## Payload
 
@@ -28,7 +30,7 @@ The body is the [message object](/api-reference/messages/show) plus these fields
 </ResponseField>
 
 <ResponseField name="event_id" type="string" required>
-  Unique per delivery. Use it to de-duplicate.
+  Unique per message and status, and the same on every retry of that status. Use it to de-duplicate.
 </ResponseField>
 
 <ResponseField name="reference_id" type="string">
@@ -40,11 +42,15 @@ The body is the [message object](/api-reference/messages/show) plus these fields
 </ResponseField>
 
 <ResponseField name="clinic_id" type="string" required>
-  The practice the message was sent for.
+  The practice the message was sent for: the same id you send as `X-Client-Id`.
 </ResponseField>
 
 <ResponseField name="occurred_at" type="string" required>
-  When the status changed (ISO 8601).
+  When the status changed (ISO 8601). The same on every retry.
+</ResponseField>
+
+<ResponseField name="timestamp" type="string" required>
+  When this request was sent (ISO 8601).
 </ResponseField>
 
 <CodeGroup>
@@ -99,7 +105,7 @@ The body is the [message object](/api-reference/messages/show) plus these fields
 
 ## Verifying Webhook Signatures
 
-Signatures work the same way as the [AI outbound outcome webhook](/api-reference/ai_outbound/outcome_webhook#verifying-webhook-signatures) and use the same practice secret. When it's configured, each request carries `X-Webhook-Signature`: the HMAC-SHA256 hex digest of the raw request body. Verify it with a constant-time comparison before processing the payload.
+Signatures work the same way as the [AI outbound outcome webhook](/api-reference/ai_outbound/outcome_webhook#verifying-webhook-signatures) and use the same practice secret. Webhooks are unsigned unless a secret is set up for the practice; contact [engineering@getoliver.com](mailto:engineering@getoliver.com) to get one. Once it is, each request carries `X-Webhook-Signature`: the HMAC-SHA256 hex digest of the raw request body. Verify it with a constant-time comparison before processing the payload.
 
 ## Delivery and Retries
 

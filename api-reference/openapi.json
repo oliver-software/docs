@@ -2579,7 +2579,7 @@
           {
             "name": "X-Client-Id",
             "in": "header",
-            "description": "The location id of the practice",
+            "description": "The practice's id (one clinic location), provided by Oliver at onboarding. Not a pet owner's `client_id`.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2710,7 +2710,7 @@
           {
             "name": "X-Client-Id",
             "in": "header",
-            "description": "The location id of the practice",
+            "description": "The practice's id (one clinic location), provided by Oliver at onboarding. Not a pet owner's `client_id`.",
             "required": true,
             "schema": {
               "type": "string"
@@ -4374,7 +4374,7 @@
         "properties": {
           "recipient": {
             "type": "object",
-            "description": "Who to text: an Oliver `client_id` (sent to the client's primary phone) or a `phone_number`.",
+            "description": "Who to text: an Oliver `client_id` (a pet owner, sent to their primary phone) or a US `phone_number`. Not the practice: that's the `X-Client-Id` header.",
             "properties": {
               "client_id": {
                 "type": "string",
@@ -4399,7 +4399,7 @@
           "fallback_text": {
             "type": "string",
             "maxLength": 1600,
-            "description": "Required. The SMS sent when RCS isn't available, and the copy the clinic sees in its inbox. Make it stand on its own: include any link the buttons carry.",
+            "description": "Required. The SMS sent when RCS isn't available, and the copy the clinic sees in its inbox. Over RCS it is also the message itself for `content.type: text` (there's no separate body field) and the caption under a `media` image. Make it stand on its own: include any link the buttons carry.",
             "example": "Hi! Millie has preventive care due October 21-22. Book here: https://vet.example.com/book or call us at (512) 555-0100."
           },
           "content": {
@@ -4431,17 +4431,19 @@
           "status": {
             "type": "string",
             "enum": [
+              "pending",
               "sent",
+              "failed",
               "delivered",
               "read",
-              "failed",
               "suppressed"
-            ]
+            ],
+            "description": "Moves forward only, in this order: `pending` \u2192 `sent` \u2192 `failed` \u2192 `delivered` \u2192 `read`; `suppressed` is final. `failed` isn't always final: when RCS fails and the SMS fallback is delivered, `delivered` follows. `pending` means Oliver couldn't confirm the send after a `502`; retry the POST with the same `reference_id`."
           },
           "status_reason": {
             "type": "string",
             "nullable": true,
-            "description": "Why a message is `suppressed` (`opted_out`, `blocked_number`) or `failed`."
+            "description": "Why a message is `suppressed` (`opted_out`, `blocked_number`) or `failed` (`delivery_failed`)."
           },
           "channel_requested": {
             "type": "string",
