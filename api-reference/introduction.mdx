@@ -17,8 +17,8 @@ In addition to the Authorization header, all requests must include the following
 
 - `Content-Type: application/json`
 - `Accept: application/json`
-- `X-Client-Id: <your-client-id>`
-    - Required header that identifies which PIMS instance the request is intended for.
-    - This unique identifier is provided by Oliver during the onboarding process.
-    - Contact [engineering@getoliver.com](mailto:engineering@getoliver.com) if you need to obtain or verify your Client ID.
+- `X-Client-Id: <practice-id>`
+    - Required header that identifies the practice (one clinic location) the request is for. Despite the header's name, this is not a pet owner's `client_id`.
+    - Oliver provides each practice's id during onboarding. Webhooks return the same id as `clinic_id`.
+    - Contact [engineering@getoliver.com](mailto:engineering@getoliver.com) if you need to obtain or verify a practice id.
 

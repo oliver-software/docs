@@ -7,6 +7,10 @@ The Messages API sends one text to a client on the practice's behalf. On phones 
 
 Messages appear in the practice's Oliver inbox like any other text, so staff see what was sent and can pick up the client's reply.
 
+<Note>
+  **Identifiers.** The `X-Client-Id` header is the practice's id. `recipient.client_id` is a pet owner (an Oliver client). Webhooks call the practice `clinic_id`, the same value as `X-Client-Id`.
+</Note>
+
 ## How it works
 
 1. **Send**: POST to [`/messages`](/api-reference/messages/create) with a `recipient`, the `fallback_text` and the `content`.
@@ -131,6 +135,19 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/message
 
 Card `buttons` show on the card. `suggestions` show after the message, as a list of taps on iPhone and a row of chips on Android.
 
+## What `fallback_text` is used for
+
+`fallback_text` is required on every message. It's always the SMS the client gets when RCS isn't available, and the copy staff see in the practice's inbox. Over RCS it also does this, by content type:
+
+| `content.type` | What the client sees from `fallback_text` over RCS |
+| --- | --- |
+| `text` | The message itself. There's no separate body field: write the message in `fallback_text`. |
+| `media` | A small grey caption under the image; links in it aren't tappable. |
+| `card` | Nothing; the card shows `title` and `description`. |
+| `carousel` | Nothing on iPhone; the cards carry the message. |
+
+Write it to stand on its own as an SMS: include any link or phone number the buttons carry.
+
 Calendar and share-location actions aren't supported by our RCS provider; requests that use them return `400`.
 
 ## Limits
@@ -138,8 +155,9 @@ Calendar and share-location actions aren't supported by our RCS provider; reques
 | Item | Limit |
 | --- | --- |
 | Buttons per card | 4 |
-| Suggestions per message | 11 |
+| Suggestions per message | 11, of which at most 10 can be `reply` |
 | Replies per message (buttons and suggestions together) | 10 |
+| Suggestions on a carousel | None; put buttons on its cards |
 | Cards in a carousel | 2 to 10 |
 | Card title | 200 characters |
 | Card description | 1,600 characters |
@@ -217,13 +235,14 @@ Invalid content returns `400` with every offending field:
 
 | Status | Meaning |
 | --- | --- |
+| `pending` | Oliver couldn't confirm the send after a `502`. Retry the POST with the same `reference_id`. Shown only by `GET`; no webhook. |
 | `sent` | Handed to the carrier. |
+| `failed` | Couldn't be delivered; see `error_code` and `error_message`. Not always final (see below). |
 | `delivered` | Reached the client's phone. |
 | `read` | The client opened it (RCS only). |
-| `failed` | Couldn't be delivered; see `error_code` and `error_message`. |
-| `suppressed` | Not sent because the client opted out of texts (`opted_out`) or the number can't receive them (`blocked_number`). |
+| `suppressed` | Not sent because the client opted out of texts (`opted_out`) or the number can't receive them (`blocked_number`). Final. |
 
-Statuses only move forward. A message that falls back from RCS to SMS can report a delivery error for the RCS attempt and still end `delivered`.
+Statuses only move forward, in the order of this table: `pending` → `sent` → `failed` → `delivered` → `read`. `suppressed` is final. `failed` comes before `delivered` because a message that falls back from RCS to SMS can report a delivery error for the RCS attempt and then be delivered by SMS, so don't treat `failed` as final: a later `delivered` or `read` replaces it.
 
 ## Sending hours
 
@@ -248,7 +267,7 @@ Messages are sent immediately; Oliver doesn't queue them for later. Send during 
 | `400`, field `recipient` | The number can't receive texts | Check the number. |
 | `400`, field `content` | The messaging provider rejected the content, e.g. an image URL it couldn't fetch | Fix the content. |
 | `400`, field `null` | Outside sending hours | Send during sending hours. |
-| `502` | The messaging provider was briefly unavailable | Retry with the same `reference_id`. |
+| `502` | The messaging provider was briefly unavailable | Retry with the same `reference_id`. Until you do, `GET` shows the message as `pending`. |
 
 A `400` stores nothing, so you can fix the request and reuse its `reference_id`.
 
