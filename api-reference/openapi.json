@@ -3830,6 +3830,15 @@
             "type": "string",
             "format": "date-time",
             "description": "When the request was created, in ISO 8601 format."
+          },
+          "opener_channel": {
+            "type": "string",
+            "enum": [
+              "rcs",
+              "sms"
+            ],
+            "nullable": true,
+            "description": "How the first message reached the client: `rcs` (the rich `content` was shown) or `sms` (the plain text). Null until the carrier reports it, and for a request that never sent."
           }
         }
       },
@@ -3873,11 +3882,20 @@
           },
           "patient_id": {
             "type": "string",
-            "description": "Oliver's identifier for the patient the outreach concerns, if applicable."
+            "description": "Oliver's identifier for the patient the outreach concerns, if applicable. To name several pets, use `patients` instead."
           },
           "patient_name": {
             "type": "string",
-            "description": "Patient name, used to match a patient within the resolved client."
+            "description": "Patient name, used to match a patient within the resolved client. To name several pets, use `patients` instead."
+          },
+          "patients": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "The pets the outreach is about, up to 10, each with what it is due for. The opener and the whole conversation use them, so one message can cover several pets and the AI books them together. Each pet must be one of the client's active pets, or the request returns `400` naming it (e.g. `patients[1]`). The first pet is the request's `patient_id`. Don't combine with `patient_id` or `patient_name`.",
+            "items": {
+              "$ref": "#/components/schemas/AiOutboundPatient"
+            }
           },
           "context": {
             "type": "string",
@@ -3886,6 +3904,15 @@
           "initial_message_script": {
             "type": "string",
             "description": "The exact opening message for the AI to send. If provided, Oliver uses it verbatim; otherwise Oliver generates an opener based on the `purpose`."
+          },
+          "content": {
+            "$ref": "#/components/schemas/MessageContent",
+            "description": "Optional rich opener: a card, carousel, image or reply buttons, the same shape and limits as the [messages endpoint](/api-reference/messages/overview). Clients whose phone supports RCS see it; everyone else gets the plain-text opener. Every reply, including a reply-button tap, goes to Oliver's AI, which continues the conversation. For `type: text`, the text bubble is the plain-text opener. Requires `channel: sms`."
+          },
+          "fallback_text": {
+            "type": "string",
+            "maxLength": 1600,
+            "description": "The plain-text opener, sent verbatim. It's the SMS a client without RCS receives, and the bubble a `text` content's reply buttons attach to. Takes precedence over `initial_message_script`. If neither is sent, Oliver writes the opener from the `purpose`, `context` and `patients`."
           },
           "partner_request_id": {
             "type": "string",
@@ -4318,6 +4345,51 @@
             "maxItems": 4,
             "items": {
               "$ref": "#/components/schemas/MessageButton"
+            }
+          }
+        }
+      },
+      "AiOutboundPatient": {
+        "type": "object",
+        "description": "One pet the outreach is about. Provide `patient_id` or `patient_name`.",
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "description": "Oliver's identifier for the pet."
+          },
+          "patient_name": {
+            "type": "string",
+            "description": "The pet's name. Must match exactly one of the client's active pets."
+          },
+          "services_due": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "What the pet is due for. Each item is a name (`\"Rabies\"`) or an object with a `name` and an optional `due_date`. The AI may tell the client about these.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "example": "Rabies vaccine"
+                    },
+                    "due_date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2026-10-30"
+                    }
+                  }
+                }
+              ]
             }
           }
         }
