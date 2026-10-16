@@ -85,6 +85,10 @@ The webhook payload is sent as a JSON object with the following structure:
   The outreach channel. One of `sms`, `voice`.
 </ResponseField>
 
+<ResponseField name="opener_channel" type="string">
+  How the first message reached the client: `rcs` (a rich `content` opener was shown) or `sms`. `null` when the request never sent, or the carrier hasn't reported it.
+</ResponseField>
+
 <ResponseField name="purpose" type="string" required>
   The purpose of the outreach. One of `scheduling`, `callback_followup`, `refill`, `general`.
 </ResponseField>
@@ -140,6 +144,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "partner_request_id": "partner-abc-123",
   "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "channel": "sms",
+  "opener_channel": "rcs",
   "purpose": "scheduling",
   "status": "completed",
   "outcome": "booked",
@@ -161,6 +166,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "partner_request_id": "partner-abc-124",
   "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "channel": "sms",
+  "opener_channel": "sms",
   "purpose": "refill",
   "status": "completed",
   "outcome": "no_response",
@@ -182,6 +188,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "partner_request_id": "partner-abc-125",
   "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "channel": "sms",
+  "opener_channel": null,
   "purpose": "scheduling",
   "status": "suppressed",
   "outcome": null,
@@ -203,6 +210,7 @@ The webhook payload is sent as a JSON object with the following structure:
   "partner_request_id": "partner-abc-126",
   "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "channel": "sms",
+  "opener_channel": null,
   "purpose": "callback_followup",
   "status": "failed",
   "outcome": "undeliverable",

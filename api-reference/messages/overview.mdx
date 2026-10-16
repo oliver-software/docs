@@ -131,7 +131,7 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/message
 | --- | --- | --- |
 | `open_url` | Opens a web page | `url` (https) |
 | `dial` | Calls a number | `phone_number` (E.164, e.g. `+15125550100`) |
-| `reply` | Sends its text back as the client's reply, which lands in the practice inbox | optional `id` |
+| `reply` | Sends its text back as the client's reply, which lands in the practice inbox. To have Oliver's AI answer instead, send the same `content` through [AI Outbound](/api-reference/ai_outbound/overview#rich-openers-rcs). | optional `id` |
 
 Card `buttons` show on the card. `suggestions` show after the message, as a list of taps on iPhone and a row of chips on Android.
 
