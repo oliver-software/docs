@@ -22,7 +22,7 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
   -H "Authorization: Bearer $OLIVER_TOKEN" \
   -H "Accept: application/json" \
   -F "file=@rabies-reminder.png" \
-  -F "reference_id=rabies-reminder"
+  -F "reference_id=asset-48213"
 ```
 
 ```json Response (201)
@@ -34,7 +34,7 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
     "content_type": "image/png",
     "size_bytes": 182344,
     "file_name": "rabies-reminder.png",
-    "reference_id": "rabies-reminder",
+    "reference_id": "asset-48213",
     "created_at": "2026-10-21T18:02:11Z",
     "updated_at": "2026-10-21T18:02:11Z"
   },
@@ -48,7 +48,7 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
 curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
   -H "Authorization: Bearer $OLIVER_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{ "url": "https://partner.example.com/images/rabies-reminder.png", "reference_id": "rabies-reminder" }'
+  -d '{ "url": "https://partner.example.com/images/rabies-reminder.png", "reference_id": "asset-48213" }'
 ```
 
 Oliver downloads the file once and never fetches it again. The URL must be https and serve the file directly: redirects aren't followed.
@@ -113,7 +113,7 @@ A replace gives the file a new `url`; the `media_id` doesn't change.
 
 ## Idempotency
 
-Set `reference_id` to a name you choose, unique within your API account, such as `rabies-reminder`. Uploading again with the same `reference_id` returns the existing file with `200` instead of storing a copy, even if you send a different file, so a retry after a timeout is safe. To change the file, [replace it](/api-reference/media/update). The media endpoints also accept the `reference_id` in place of the `media_id` in their URLs, e.g. `GET /media/rabies-reminder`. Sends need the `media_id`.
+Set `reference_id` to the image's ID in your own system, such as `asset-48213`. It must be unique within your API account. Avoid a descriptive name like `rabies-reminder`: if you later upload a new image under the same name, you get the old file back. Uploading again with the same `reference_id` returns the existing file with `200` instead of storing a copy, even if you send a different file, so a retry after a timeout is safe. To change the file, [replace it](/api-reference/media/update). The media endpoints also accept the `reference_id` in place of the `media_id` in their URLs, e.g. `GET /media/asset-48213`. Sends need the `media_id`.
 
 ## Listing
 
