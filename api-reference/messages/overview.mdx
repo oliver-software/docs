@@ -36,7 +36,7 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
     "card": {
       "title": "Millie's care is due Oct 21-22",
       "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'll combine them into one visit when possible.",
-      "media_url": "https://cdn.example.com/millie-reminder.png",
+      "media_id": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10",
       "buttons": [
         { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }
       ]
@@ -82,7 +82,7 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
 {
   "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
   "fallback_text": "Happy 5th birthday, Millie! From all of us at Your Veterinary Clinic.",
-  "content": { "type": "media", "media_url": "https://cdn.example.com/millie-birthday.png" }
+  "content": { "type": "media", "media_id": "c2a7e0f4-1b5d-4e8a-9c3f-7d6b2a1e0f95" }
 }
 ```
 
@@ -95,6 +95,8 @@ Messages appear in the practice's Oliver inbox like any other text, so staff see
 ```
 
 </CodeGroup>
+
+`media_id` is a file you [uploaded to Oliver once](/api-reference/media/overview), so your messages don't depend on your own hosting. A hosted `media_url` works anywhere `media_id` does; use it for an image that differs per client, like the per-pet carousel above.
 
 ### Sending with cURL
 
@@ -112,7 +114,7 @@ curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/message
       "card": {
         "title": "Millie'\''s care is due Oct 21-22",
         "description": "Bordetella vaccine, physical exam and ProHeart 6 injection. We'\''ll combine them into one visit when possible.",
-        "media_url": "https://cdn.example.com/millie-reminder.png",
+        "media_id": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10",
         "buttons": [
           { "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }
         ]
@@ -137,7 +139,7 @@ Card `buttons` show on the card. `suggestions` show after the message, as a list
 
 ## What `fallback_text` is used for
 
-`fallback_text` is required on every message. It's always the SMS the client gets when RCS isn't available, and the copy staff see in the practice's inbox. Over RCS it also does this, by content type:
+`fallback_text` is required on every message. It's always the text the client gets when RCS isn't available, and the copy staff see in the practice's inbox. Over RCS it also does this, by content type:
 
 | `content.type` | What the client sees from `fallback_text` over RCS |
 | --- | --- |
@@ -145,6 +147,8 @@ Card `buttons` show on the card. `suggestions` show after the message, as a list
 | `media` | A small grey caption under the image; links in it aren't tappable. |
 | `card` | Nothing; the card shows `title` and `description`. |
 | `carousel` | Nothing on iPhone; the cards carry the message. |
+
+At a practice with RCS, a `media` message reaches a phone without RCS as an MMS: the image, with `fallback_text` as its text. Every other type arrives as `fallback_text` alone.
 
 Write it to stand on its own as an SMS: include any link or phone number the buttons carry.
 
@@ -212,7 +216,7 @@ Phones decide how RCS content looks; the API can't change it. These screenshots 
 
 **Images and carousels**
 
-- Use one image for every send; the date belongs in the text, not the image. Wide (2:1), square (1:1) and tall (3:4) images all showed uncropped, at full card width; a tall image makes a tall card.
+- Use one image for every send, [uploaded once](/api-reference/media/overview); the date belongs in the text, not the image. Images: jpeg, png or gif; video: mp4; at most 5 MB, the MMS limit (an image message reaches phones without RCS as an MMS). Wide (2:1), square (1:1) and tall (3:4) images all showed uncropped, at full card width; a tall image makes a tall card.
 - A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Each card follows the button rules on its own, and a reply button on a card shows as a tap under the carousel.
 - A carousel's `fallback_text` isn't shown above the cards on iPhone, so put everything the client needs in the cards.
 

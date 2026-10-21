@@ -2775,6 +2775,393 @@
           }
         }
       }
+    },
+    "/services/core/open_api/v1/media": {
+      "get": {
+        "summary": "List media",
+        "description": "List the files your API account has uploaded, newest first.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "description": "Optional. Files belong to your API account, not a practice, and work at every practice you can send to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting at 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page. Max is 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Your files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MediaListResponse"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload media",
+        "description": "Upload an image or video once and reuse it in every message by its `media_id`. Send the file as `multipart/form-data`, or send JSON with a `url` for Oliver to copy once. Files never expire.\n\nAccepted: jpeg, png, gif and mp4, at most 5 MB (the MMS limit: an image message reaches phones without RCS as an MMS). The type is read from the file itself.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "description": "Optional. Files belong to your API account, not a practice, and work at every practice you can send to.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUpload"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaImport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Media"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "An existing file returned for a repeated `reference_id`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Media"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: a missing, unsupported or oversized file, a URL that couldn't be downloaded, or both `file` and `url`. `data.errors` names the field (`file` or `url`) and says what was detected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: more than 30 uploads and replaces a minute",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/core/open_api/v1/media/{id}": {
+      "get": {
+        "summary": "Get media",
+        "description": "Fetch one of your files by its `media_id` or `reference_id`.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "description": "Optional. Files belong to your API account, not a practice, and work at every practice you can send to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The `media_id`, or your `reference_id`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Media"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: no file with this id for your API account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Replace media",
+        "description": "Replace the file behind a `media_id`, by upload or URL. Messages sent after the replace use the new file; the `media_id` stays the same and the `url` changes. Messages already sent, and AI Outbound requests already accepted, keep the previous file.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "description": "Optional. Files belong to your API account, not a practice, and work at every practice you can send to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The `media_id`, or your `reference_id`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "A jpeg, png, gif or mp4 file, at most 5 MB."
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "An https URL that serves the file directly (redirects aren't followed). Oliver downloads it once and never fetches it again.",
+                    "example": "https://partner.example.com/images/rabies-reminder.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Media"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: a missing, unsupported or oversized file, a URL that couldn't be downloaded, or both `file` and `url`. `data.errors` names the field (`file` or `url`) and says what was detected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests: more than 30 uploads and replaces a minute",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {},
@@ -4332,8 +4719,13 @@
           "media_url": {
             "type": "string",
             "format": "uri",
-            "description": "An https image or video URL shown at the top of the card.",
+            "description": "An https image or video URL shown at the top of the card. Or send `media_id` instead.",
             "example": "https://cdn.example.com/millie-reminder.png"
+          },
+          "media_id": {
+            "type": "string",
+            "description": "A `media_id` from [Upload Media](/api-reference/media/create), in place of `media_url`. Send one or the other, not both.",
+            "example": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10"
           },
           "buttons": {
             "type": "array",
@@ -4394,7 +4786,7 @@
         "required": [
           "type"
         ],
-        "description": "What the client sees over RCS. One message is either a text bubble or a card, never both, so put any intro sentence in the card's `description`.\n\n- `text`: the text is `fallback_text`; add `suggestions` for reply chips.\n- `media`: an image or video (`media_url`), with optional `suggestions`.\n- `card`: one rich card (`card`), with optional `suggestions`.\n- `carousel`: 2 to 10 cards (`cards`) the client swipes through. No `suggestions`; put buttons on the cards.",
+        "description": "What the client sees over RCS. One message is either a text bubble or a card, never both, so put any intro sentence in the card's `description`.\n\n- `text`: the text is `fallback_text`; add `suggestions` for reply chips.\n- `media`: an image or video (`media_url` or `media_id`), with optional `suggestions`.\n- `card`: one rich card (`card`), with optional `suggestions`.\n- `carousel`: 2 to 10 cards (`cards`) the client swipes through. No `suggestions`; put buttons on the cards.",
         "properties": {
           "type": {
             "type": "string",
@@ -4408,7 +4800,12 @@
           "media_url": {
             "type": "string",
             "format": "uri",
-            "description": "`media` only."
+            "description": "`media` only. Or send `media_id` instead."
+          },
+          "media_id": {
+            "type": "string",
+            "description": "`media` only. A `media_id` from [Upload Media](/api-reference/media/create), in place of `media_url`.",
+            "example": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10"
           },
           "card": {
             "$ref": "#/components/schemas/MessageCard"
@@ -4611,6 +5008,122 @@
                 }
               }
             }
+          }
+        }
+      },
+      "Media": {
+        "type": "object",
+        "properties": {
+          "media_id": {
+            "type": "string",
+            "description": "Pass this as `media_id` in message and AI Outbound content.",
+            "example": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The file's public URL on Oliver's CDN. A replace gives the file a new URL.",
+            "example": "https://cdn.getoliver.com/m/0d3c9a52-8f1e-4b7a-a6c4-5e2f1b9d8c37/image.png"
+          },
+          "content_type": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "video/mp4"
+            ],
+            "description": "Detected from the file itself, not from the upload's headers or file name."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "example": 182344
+          },
+          "file_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The uploaded file's name, or the last part of the imported URL.",
+            "example": "rabies-reminder.png"
+          },
+          "reference_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "rabies-reminder"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the file was last uploaded or replaced."
+          }
+        }
+      },
+      "MediaListResponse": {
+        "type": "object",
+        "required": [
+          "page",
+          "per_page",
+          "total_pages",
+          "total_count",
+          "content"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "array",
+            "description": "Your files, newest first",
+            "items": {
+              "$ref": "#/components/schemas/Media"
+            }
+          }
+        }
+      },
+      "MediaUpload": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "A jpeg, png, gif or mp4 file, at most 5 MB."
+          },
+          "reference_id": {
+            "type": "string",
+            "description": "Optional, unique per API account. Uploading again with the same `reference_id` returns the existing file instead of storing a copy, even if the file is different, so a retry is safe. You can also use it in place of `media_id` in the media endpoints' URLs."
+          }
+        }
+      },
+      "MediaImport": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "An https URL that serves the file directly (redirects aren't followed). Oliver downloads it once and never fetches it again.",
+            "example": "https://partner.example.com/images/rabies-reminder.png"
+          },
+          "reference_id": {
+            "type": "string",
+            "description": "As for a file upload."
           }
         }
       }
