@@ -1,0 +1,120 @@
+---
+title: 'Media Overview'
+description: 'Upload a card image once and reuse it in every message'
+---
+
+Upload an image or video to Oliver once and get back a `media_id`. Pass that `media_id` instead of a `media_url` in [Messages](/api-reference/messages/overview) and [AI Outbound](/api-reference/ai_outbound/overview) content. Oliver hosts the file, so your messages don't depend on your own image hosting staying up.
+
+Files belong to your API account, not to a practice: upload a reminder image once and use it at every practice you send for. `X-Client-Id` is optional on the media endpoints. Files never expire.
+
+## How it works
+
+1. **Upload**: POST the file to [`/media`](/api-reference/media/create), or send a `url` for Oliver to copy once. Store the `media_id` it returns.
+2. **Send**: put `"media_id": "<media_id>"` wherever you'd put `media_url`: on a `card`, on each card of a `carousel`, or on `media` content.
+3. **Replace** (optional): PUT a new file to [`/media/{id}`](/api-reference/media/update). The `media_id` stays the same, and sends after the replace use the new file.
+
+## Upload a file
+
+The upload is `multipart/form-data`, unlike the other endpoints, which take JSON.
+
+```bash
+curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
+  -H "Authorization: Bearer $OLIVER_TOKEN" \
+  -H "Accept: application/json" \
+  -F "file=@rabies-reminder.png" \
+  -F "reference_id=rabies-reminder"
+```
+
+```json Response (201)
+{
+  "success": true,
+  "data": {
+    "media_id": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10",
+    "url": "https://cdn.getoliver.com/m/0d3c9a52-8f1e-4b7a-a6c4-5e2f1b9d8c37/image.png",
+    "content_type": "image/png",
+    "size_bytes": 182344,
+    "file_name": "rabies-reminder.png",
+    "reference_id": "rabies-reminder",
+    "created_at": "2026-10-21T18:02:11Z",
+    "updated_at": "2026-10-21T18:02:11Z"
+  },
+  "message": null
+}
+```
+
+### Or copy one you already host
+
+```bash
+curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/media \
+  -H "Authorization: Bearer $OLIVER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://partner.example.com/images/rabies-reminder.png", "reference_id": "rabies-reminder" }'
+```
+
+Oliver downloads the file once and never fetches it again. The URL must be https and serve the file directly: redirects aren't followed.
+
+## Send a card with it
+
+```bash
+curl -X POST https://partner-api.getoliver.com/services/core/open_api/v1/messages \
+  -H "Authorization: Bearer $OLIVER_TOKEN" \
+  -H "X-Client-Id: $PRACTICE_ID" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": { "client_id": "0b0e5a54-7c1f-4a43-9d4e-2f3c7d0d1a11" },
+    "reference_id": "inv-reminder-88412",
+    "fallback_text": "Bella is due for her rabies vaccine on Nov 2. Book here: https://vet.example.com/book",
+    "content": {
+      "type": "card",
+      "card": {
+        "title": "Bella is due for her rabies vaccine",
+        "description": "Due Nov 2. Tap below to pick a time that works for you.",
+        "media_id": "6f1c2b9e-3d4a-4c7e-9b1a-2e5f8d7c6a10",
+        "buttons": [{ "type": "open_url", "text": "Schedule now", "url": "https://vet.example.com/book" }]
+      }
+    }
+  }'
+```
+
+Send `media_id` or `media_url` on a card, not both. A `media_id` that doesn't exist, or belongs to another API account, returns `400` naming the field:
+
+```json
+{
+  "success": false,
+  "message": "content.card.media_id not found for this API account",
+  "data": {
+    "message": "content.card.media_id not found for this API account",
+    "errors": [{ "field": "content.card.media_id", "message": "not found for this API account" }]
+  }
+}
+```
+
+## Files
+
+| Item | Limit |
+| --- | --- |
+| Types | jpeg, png, gif, mp4 |
+| Size | 5 MB (5,000,000 bytes). This is the MMS limit, which applies when a message falls back from RCS to SMS. |
+| Uploads and replaces | 30 a minute per API account |
+
+Oliver reads the type from the file itself, not from its name or the upload's `Content-Type`. An unsupported or oversized file returns `400` saying what was found, for example `file is image/heic; accepted types are jpeg, png, gif or mp4`. Convert iPhone HEIC photos and WebP images to jpeg or png first.
+
+<Warning>
+  Files are public and can't be deleted through the API, so don't put client or pet details in them. Use one image for every send and keep names and dates in the card text. To have a file removed, email [engineering@getoliver.com](mailto:engineering@getoliver.com).
+</Warning>
+
+## Replacing a file
+
+A replace gives the file a new `url`; the `media_id` doesn't change.
+
+- Messages sent after the replace show the new file.
+- Messages already sent keep the old one.
+- An [AI Outbound](/api-reference/ai_outbound/overview) request keeps the image it had when Oliver accepted it, even if its first text goes out after the replace.
+
+## Idempotency
+
+Set `reference_id` to a name you choose, unique within your API account, such as `rabies-reminder`. Uploading again with the same `reference_id` returns the existing file with `200` instead of storing a copy, so a retry after a timeout is safe. The media endpoints also accept the `reference_id` in place of the `media_id` in their URLs, e.g. `GET /media/rabies-reminder`. Sends need the `media_id`.
+
+## Listing
+
+[`GET /media`](/api-reference/media/index) lists your files, newest first, 50 a page by default (`per_page` up to 100; `page` starts at 0).

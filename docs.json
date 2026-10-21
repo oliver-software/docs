@@ -94,6 +94,16 @@
             ]
           },
           {
+            "group": "Media Endpoints",
+            "pages": [
+              "api-reference/media/overview",
+              "api-reference/media/create",
+              "api-reference/media/index",
+              "api-reference/media/show",
+              "api-reference/media/update"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/webhooks/service_reminder",
