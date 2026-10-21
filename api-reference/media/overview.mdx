@@ -94,8 +94,8 @@ Send `media_id` or `media_url` on a card, not both. A `media_id` that doesn't ex
 | Item | Limit |
 | --- | --- |
 | Types | jpeg, png, gif, mp4 |
-| Size | 5 MB (5,000,000 bytes). This is the MMS limit, which applies when a message falls back from RCS to SMS. |
-| Uploads and replaces | 30 a minute per API account |
+| Size | 5 MB (5,000,000 bytes). This is the MMS limit: an image message (`content.type: media`) reaches phones without RCS as an MMS. |
+| Uploads and replaces | 30 a minute per API account, together |
 
 Oliver reads the type from the file itself, not from its name or the upload's `Content-Type`. An unsupported or oversized file returns `400` saying what was found, for example `file is image/heic; accepted types are jpeg, png, gif or mp4`. Convert iPhone HEIC photos and WebP images to jpeg or png first.
 
@@ -113,7 +113,7 @@ A replace gives the file a new `url`; the `media_id` doesn't change.
 
 ## Idempotency
 
-Set `reference_id` to a name you choose, unique within your API account, such as `rabies-reminder`. Uploading again with the same `reference_id` returns the existing file with `200` instead of storing a copy, so a retry after a timeout is safe. The media endpoints also accept the `reference_id` in place of the `media_id` in their URLs, e.g. `GET /media/rabies-reminder`. Sends need the `media_id`.
+Set `reference_id` to a name you choose, unique within your API account, such as `rabies-reminder`. Uploading again with the same `reference_id` returns the existing file with `200` instead of storing a copy, even if you send a different file, so a retry after a timeout is safe. To change the file, [replace it](/api-reference/media/update). The media endpoints also accept the `reference_id` in place of the `media_id` in their URLs, e.g. `GET /media/rabies-reminder`. Sends need the `media_id`.
 
 ## Listing
 

@@ -139,7 +139,7 @@ Card `buttons` show on the card. `suggestions` show after the message, as a list
 
 ## What `fallback_text` is used for
 
-`fallback_text` is required on every message. It's always the SMS the client gets when RCS isn't available, and the copy staff see in the practice's inbox. Over RCS it also does this, by content type:
+`fallback_text` is required on every message. It's always the text the client gets when RCS isn't available, and the copy staff see in the practice's inbox. Over RCS it also does this, by content type:
 
 | `content.type` | What the client sees from `fallback_text` over RCS |
 | --- | --- |
@@ -147,6 +147,8 @@ Card `buttons` show on the card. `suggestions` show after the message, as a list
 | `media` | A small grey caption under the image; links in it aren't tappable. |
 | `card` | Nothing; the card shows `title` and `description`. |
 | `carousel` | Nothing on iPhone; the cards carry the message. |
+
+At a practice with RCS, a `media` message reaches a phone without RCS as an MMS: the image, with `fallback_text` as its text. Every other type arrives as `fallback_text` alone.
 
 Write it to stand on its own as an SMS: include any link or phone number the buttons carry.
 
@@ -214,7 +216,7 @@ Phones decide how RCS content looks; the API can't change it. These screenshots 
 
 **Images and carousels**
 
-- Use one image for every send, [uploaded once](/api-reference/media/overview); the date belongs in the text, not the image. Images: jpeg, png or gif; video: mp4; at most 5 MB, the limit when a message falls back to SMS. Wide (2:1), square (1:1) and tall (3:4) images all showed uncropped, at full card width; a tall image makes a tall card.
+- Use one image for every send, [uploaded once](/api-reference/media/overview); the date belongs in the text, not the image. Images: jpeg, png or gif; video: mp4; at most 5 MB, the MMS limit (an image message reaches phones without RCS as an MMS). Wide (2:1), square (1:1) and tall (3:4) images all showed uncropped, at full card width; a tall image makes a tall card.
 - A carousel shows as a stack of cards with a "1 of N" counter, each card's link as a tap. Each card follows the button rules on its own, and a reply button on a card shows as a tap under the carousel.
 - A carousel's `fallback_text` isn't shown above the cards on iPhone, so put everything the client needs in the cards.
 

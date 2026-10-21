@@ -2848,7 +2848,7 @@
       },
       "post": {
         "summary": "Upload media",
-        "description": "Upload an image or video once and reuse it in every message by its `media_id`. Send the file as `multipart/form-data`, or send JSON with a `url` for Oliver to copy once. Files never expire.\n\nAccepted: jpeg, png, gif and mp4, at most 5 MB (the MMS limit, which applies when a message falls back to SMS). The type is read from the file itself.",
+        "description": "Upload an image or video once and reuse it in every message by its `media_id`. Send the file as `multipart/form-data`, or send JSON with a `url` for Oliver to copy once. Files never expire.\n\nAccepted: jpeg, png, gif and mp4, at most 5 MB (the MMS limit: an image message reaches phones without RCS as an MMS). The type is read from the file itself.",
         "parameters": [
           {
             "name": "X-Client-Id",
@@ -2949,7 +2949,7 @@
             }
           },
           "429": {
-            "description": "Too Many Requests: more than 30 uploads a minute",
+            "description": "Too Many Requests: more than 30 uploads and replaces a minute",
             "content": {
               "application/json": {
                 "schema": {
@@ -3151,7 +3151,7 @@
             }
           },
           "429": {
-            "description": "Too Many Requests: more than 30 uploads a minute",
+            "description": "Too Many Requests: more than 30 uploads and replaces a minute",
             "content": {
               "application/json": {
                 "schema": {
@@ -5105,7 +5105,7 @@
           },
           "reference_id": {
             "type": "string",
-            "description": "Optional, unique per API account. Uploading again with the same `reference_id` returns the existing file instead of storing a copy, so a retry is safe. You can also use it in place of `media_id` in the media endpoints' URLs."
+            "description": "Optional, unique per API account. Uploading again with the same `reference_id` returns the existing file instead of storing a copy, even if the file is different, so a retry is safe. You can also use it in place of `media_id` in the media endpoints' URLs."
           }
         }
       },
