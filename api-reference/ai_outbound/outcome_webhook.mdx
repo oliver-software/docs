@@ -77,6 +77,14 @@ The webhook payload is sent as a JSON object with the following structure:
   The idempotency key you supplied when creating the request, if any.
 </ResponseField>
 
+<ResponseField name="partner_message_id" type="string">
+  Only for a conversation started by a client's reply to a [message](/api-reference/messages/overview#ai-replies): that message's `id`.
+</ResponseField>
+
+<ResponseField name="message_reference_id" type="string">
+  Only for a conversation started by a client's reply to a message: that message's `reference_id`, if you set one.
+</ResponseField>
+
 <ResponseField name="clinic_id" type="string" required>
   Oliver's identifier for the practice (the value you send in the `X-Client-Id` header).
 </ResponseField>
@@ -86,7 +94,7 @@ The webhook payload is sent as a JSON object with the following structure:
 </ResponseField>
 
 <ResponseField name="opener_channel" type="string">
-  How the first message reached the client: `rcs` (a rich `content` opener was shown) or `sms`. `null` when the request never sent, or the carrier hasn't reported it.
+  How the first message reached the client: `rcs` (a rich `content` opener was shown) or `sms`. For a conversation started by a reply to a message, how that message arrived. `null` when the request never sent, or the carrier hasn't reported it.
 </ResponseField>
 
 <ResponseField name="purpose" type="string" required>
