@@ -4878,6 +4878,10 @@
             "type": "string",
             "format": "uri",
             "description": "An https URL that receives a [status webhook](/api-reference/messages/status_webhook) on each status change."
+          },
+          "ai_reply": {
+            "type": "boolean",
+            "description": "Whether Oliver's AI answers the client's reply. Leave it out to follow the practice's setting. `false` sends replies to the practice's inbox even where AI replies are on. `true` at a practice without AI replies returns `400` on `ai_reply`. See [AI replies](/api-reference/messages/overview#ai-replies)."
           }
         }
       },
@@ -4938,6 +4942,15 @@
           "error_message": {
             "type": "string",
             "nullable": true
+          },
+          "ai_reply": {
+            "type": "boolean",
+            "description": "Whether the AI answers the client's reply to this message."
+          },
+          "ai_outbound_request_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The AI conversation the client's reply started, as an [AI Outbound request](/api-reference/ai_outbound/show). `null` until the client replies."
           },
           "sent_at": {
             "type": "string",
