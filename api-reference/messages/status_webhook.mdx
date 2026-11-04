@@ -11,13 +11,14 @@ When you [send a message](/api-reference/messages/create) with a `callback_url`,
 
 | Event | Fires when |
 | --- | --- |
+| `message.held` | It was sent outside the practice's [sending hours](/api-reference/messages/overview#sending-hours) and will go out at `send_at`. Your create call already returned this status; the webhook confirms it. |
 | `message.sent` | The message was handed to the carrier. |
 | `message.delivered` | It reached the client's phone. |
 | `message.read` | The client opened it (RCS only). |
 | `message.failed` | It couldn't be delivered. `error_code` and `error_message` say why. |
 | `message.suppressed` | It was not sent because the client opted out (`status_reason: "opted_out"`) or the number can't receive texts (`blocked_number`). Your create call already returned this status; the webhook confirms it. |
 
-Each status is sent once, in order: `sent` → `failed` → `delivered` → `read`, with `suppressed` final (see [Statuses](/api-reference/messages/overview#statuses)). If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or before one you already handled as a no-op.
+Each status is sent once, in order: `held` → `sent` → `failed` → `delivered` → `read`, with `suppressed` final (see [Statuses](/api-reference/messages/overview#statuses)). If statuses change faster than they can be delivered, you get the latest one, e.g. `message.read` without a separate `message.delivered`. Branch on `status`, and treat a status at or before one you already handled as a no-op.
 
 `message.failed` isn't always final: when RCS fails and the SMS fallback is delivered, `message.delivered` follows it.
 

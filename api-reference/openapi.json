@@ -2574,7 +2574,7 @@
     "/services/core/open_api/v1/messages": {
       "post": {
         "summary": "Send a message",
-        "description": "Send one message to a client: rich RCS content (a card, carousel, image, or text with suggested replies and actions) with SMS fallback text, which is required. The message appears in the practice's Oliver inbox like any other text, and clients who opted out are never texted.\n\nMessages are sent immediately, never queued. Send only during the practice's sending hours, 8am to 9pm clinic time; outside them the request returns `400` and nothing is sent.\n\nAn opted-out recipient is not an error: it returns `200` with `status: \"suppressed\"`. Invalid input returns `400` with every problem in `data.errors`. If the messaging provider is briefly unavailable you get `502`; retry with the same `reference_id`.",
+        "description": "Send one message to a client: rich RCS content (a card, carousel, image, or text with suggested replies and actions) with SMS fallback text, which is required. The message appears in the practice's Oliver inbox like any other text, and clients who opted out are never texted.\n\nMessages are sent immediately during the practice's sending hours, 8am to 9pm clinic time. Outside them the message is accepted with `202` and `status: \"held\"`, and sent at `send_at`, the next 8am clinic time.\n\nAn opted-out recipient is not an error: it returns `200` with `status: \"suppressed\"`. Invalid input returns `400` with every problem in `data.errors`. If the messaging provider is briefly unavailable you get `502`; retry with the same `reference_id`.",
         "parameters": [
           {
             "name": "X-Client-Id",
@@ -2599,6 +2599,32 @@
         "responses": {
           "201": {
             "description": "Sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Held: sent outside the practice's sending hours. It goes out at `send_at` (the next 8am clinic time); follow it with `GET` or the status webhook.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2650,7 +2676,7 @@
             }
           },
           "400": {
-            "description": "Bad Request: invalid input (every invalid field is listed), outside the practice's sending hours, `channel: \"rcs\"` at a practice without RCS, or content the messaging provider rejected. Nothing was sent.",
+            "description": "Bad Request: invalid input (every invalid field is listed), `channel: \"rcs\"` at a practice without RCS, or content the messaging provider rejected. Nothing was sent.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4896,13 +4922,14 @@
             "type": "string",
             "enum": [
               "pending",
+              "held",
               "sent",
               "failed",
               "delivered",
               "read",
               "suppressed"
             ],
-            "description": "Moves forward only, in this order: `pending` \u2192 `sent` \u2192 `failed` \u2192 `delivered` \u2192 `read`; `suppressed` is final. `failed` isn't always final: when RCS fails and the SMS fallback is delivered, `delivered` follows. `pending` means Oliver couldn't confirm the send after a `502`; retry the POST with the same `reference_id`."
+            "description": "Moves forward only, in this order: `pending` → `held` \u2192 `sent` → `failed` \u2192 `delivered` \u2192 `read`; `suppressed` is final. `failed` isn't always final: when RCS fails and the SMS fallback is delivered, `delivered` follows. `pending` means Oliver couldn't confirm the send after a `502`; retry the POST with the same `reference_id`. `held` means it arrived outside sending hours and goes out at `send_at`."
           },
           "status_reason": {
             "type": "string",
@@ -4938,6 +4965,12 @@
           "error_message": {
             "type": "string",
             "nullable": true
+          },
+          "send_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When a `held` message goes out: the next 8am clinic time. Null for a message sent straight away."
           },
           "sent_at": {
             "type": "string",
@@ -4998,7 +5031,7 @@
                       "type": "string",
                       "example": "content.card.buttons",
                       "nullable": true,
-                      "description": "The offending field, or null for a request-level error such as sending outside the practice's sending hours."
+                      "description": "The offending field, or null for a request-level error."
                     },
                     "message": {
                       "type": "string",

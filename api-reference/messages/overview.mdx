@@ -245,28 +245,28 @@ Invalid content returns `400` with every offending field:
 | Status | Meaning |
 | --- | --- |
 | `pending` | Oliver couldn't confirm the send after a `502`. Retry the POST with the same `reference_id`. Shown only by `GET`; no webhook. |
+| `held` | Sent outside [sending hours](#sending-hours). It goes out at `send_at`, the next 8am clinic time. |
 | `sent` | Handed to the carrier. |
 | `failed` | Couldn't be delivered; see `error_code` and `error_message`. Not always final (see below). |
 | `delivered` | Reached the client's phone. |
 | `read` | The client opened it (RCS only). |
 | `suppressed` | Not sent because the client opted out of texts (`opted_out`) or the number can't receive them (`blocked_number`). Final. |
 
-Statuses only move forward, in the order of this table: `pending` → `sent` → `failed` → `delivered` → `read`. `suppressed` is final. `failed` comes before `delivered` because a message that falls back from RCS to SMS can report a delivery error for the RCS attempt and then be delivered by SMS, so don't treat `failed` as final: a later `delivered` or `read` replaces it.
+Statuses only move forward, in the order of this table: `pending` → `held` → `sent` → `failed` → `delivered` → `read`. `suppressed` is final. `failed` comes before `delivered` because a message that falls back from RCS to SMS can report a delivery error for the RCS attempt and then be delivered by SMS, so don't treat `failed` as final: a later `delivered` or `read` replaces it.
 
 ## Sending hours
 
-Messages are sent immediately; Oliver doesn't queue them for later. Send during the practice's sending hours, **8am to 9pm clinic time**, the same window as the practice's own reminders. Outside them the request returns `400` and nothing is sent:
+Messages go out straight away during the practice's sending hours, **8am to 9pm clinic time**, the same window as the practice's own reminders. A message sent outside them is checked as usual (bad input is still a `400`), then held: the response is `202` with `status: "held"` and `send_at`, and Oliver sends it at the next 8am clinic time.
 
 ```json
 {
-  "success": false,
-  "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours.",
-  "data": {
-    "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours.",
-    "errors": [{ "field": null, "message": "Outside the practice's sending hours (8am to 9pm, America/Chicago). Send the message during sending hours." }]
-  }
+  "success": true,
+  "message": "Outside the practice's sending hours (8am to 9pm clinic time); held until 2026-10-29T13:00:00Z.",
+  "data": { "id": "…", "reference_id": "inv-123", "status": "held", "send_at": "2026-10-29T13:00:00Z", "…": "…" }
 }
 ```
+
+At 8am the message goes through the normal send: a client who opted out overnight is `suppressed`, not texted. With a `callback_url` you get `message.held` when it's accepted, then the usual statuses. If the send is refused at 8am (for example, the number can't receive texts), there is no request to return a `400` to, so the message becomes `failed` with the reason in `error_code`.
 
 ## Errors that mean nothing was sent
 
@@ -275,7 +275,6 @@ Messages are sent immediately; Oliver doesn't queue them for later. Send during 
 | `400`, field `channel` | `channel: "rcs"` at a practice whose RCS sender isn't live yet | Use `auto` (RCS when possible, else SMS) or `sms`. |
 | `400`, field `recipient` | The number can't receive texts | Check the number. |
 | `400`, field `content` | The messaging provider rejected the content, e.g. an image URL it couldn't fetch | Fix the content. |
-| `400`, field `null` | Outside sending hours | Send during sending hours. |
 | `502` | The messaging provider was briefly unavailable | Retry with the same `reference_id`. Until you do, `GET` shows the message as `pending`. |
 
 A `400` stores nothing, so you can fix the request and reuse its `reference_id`.
