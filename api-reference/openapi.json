@@ -77,6 +77,88 @@
         }
       }
     },
+    "/services/core/open_api/v1/clinics": {
+      "get": {
+        "summary": "List clinics",
+        "description": "List the practices (clinic locations) your API account can call, with the id to send as `X-Client-Id` on every other request. Practices are sorted by name and the list isn't paginated. A practice where your account is only a pet owner isn't listed.",
+        "parameters": [
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "description": "Not needed: this is how you find each practice's id. If you send one, your account must belong to that practice.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The practices your API account can call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Clinic"
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "8f3c2a1e-5b7d-4e9a-9c41-2d6f0b8a7e13",
+                      "name": "Sample Animal Hospital"
+                    },
+                    {
+                      "id": "b14e9d72-0a3c-4f58-8e26-7c9d1f4a5b60",
+                      "name": "Sample Pet Clinic"
+                    }
+                  ],
+                  "message": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: the token isn't a partner API token, the account is deactivated, or the `X-Client-Id` sent is a practice the account doesn't belong to",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error. Oliver couldn't load practice names; retry the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/services/core/open_api/v1/open_times": {
       "post": {
         "description": "Search for open times for a given provider, appointment type, etc. Can be used to find open times in the future or past.",
@@ -3778,6 +3860,23 @@
           "remote_id": {
             "type": "string",
             "description": "The ID of the client in the remote system it was imported from, if available"
+          }
+        }
+      },
+      "Clinic": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The practice's id. Send it as the `X-Client-Id` header."
+          },
+          "name": {
+            "type": "string",
+            "description": "The practice's name"
           }
         }
       },

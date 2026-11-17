@@ -17,8 +17,8 @@ In addition to the Authorization header, all requests must include the following
 
 - `Content-Type: application/json` (except [Upload Media](/api-reference/media/create) and [Replace Media](/api-reference/media/update), which also take a `multipart/form-data` file upload)
 - `Accept: application/json`
-- `X-Client-Id: <practice-id>` (optional on the [Media](/api-reference/media/overview) endpoints)
+- `X-Client-Id: <practice-id>` (optional on the [Media](/api-reference/media/overview) endpoints and [List Clinics](/api-reference/clinics/index))
     - Required header that identifies the practice (one clinic location) the request is for. Despite the header's name, this is not a pet owner's `client_id`.
-    - Oliver provides each practice's id during onboarding. Webhooks return the same id as `clinic_id`.
+    - Oliver provides each practice's id during onboarding, and [List Clinics](/api-reference/clinics/index) returns the id of every practice your API account can call. Webhooks return the same id as `clinic_id`.
     - Contact [engineering@getoliver.com](mailto:engineering@getoliver.com) if you need to obtain or verify a practice id.
 
