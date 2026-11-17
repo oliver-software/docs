@@ -26,6 +26,12 @@
             ]
           },
           {
+            "group": "Clinics Endpoints",
+            "pages": [
+              "api-reference/clinics/index"
+            ]
+          },
+          {
             "group": "Open Times Endpoints",
             "pages": [
               "api-reference/open_times/search"
