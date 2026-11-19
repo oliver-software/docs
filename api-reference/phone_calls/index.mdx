@@ -33,6 +33,13 @@ to match any of several outcomes.
   two conditions catch calls the classifier filed under a different intent. It is derived at read
   time, so it is populated for historical calls too.
 - **`summary`** — the AI's one-line summary of the call.
+- **`customer_sentiment`** — the AI's read of the caller's mood from the transcript: `happy`,
+  `neutral`, `unhappy` or `unknown`. `null` until the call is analyzed.
+- **`satisfaction_rating`** — the caller's own answer to the end-of-call survey, 1 to 5 (5 = very
+  satisfied), said out loud or pressed on the keypad. `null` when the caller wasn't asked or didn't
+  answer with a number. Callers aren't asked when the practice has the survey off, on outbound
+  calls, on sensitive calls (a pet's death, a complaint) or when they were asked on another recent
+  call.
 - **`remote_client_id`** / **`remote_patient_id`** — the client's and patient's ids in your practice
   management system, qualified with the practice's server id when it has one. These are the same
   values returned by the appointments endpoints, so records line up across both.
@@ -83,7 +90,7 @@ Columns are:
 Date, Practice, Direction, Status, Caller Type, Client, Patient, Phone Number,
 Intent, Booking Intent, Summary, Sentiment, Outcome, Booked, Duration,
 Started At, Ended At, Transferred At, Transfer Outcome, Transfer Reason, Transfer Type,
-Transfer Dial Duration, Transfer Destinations
+Transfer Dial Duration, Transfer Destinations, Satisfaction Rating
 ```
 
 `Date` and the other timestamps are rendered in the practice timezone as `YYYY-MM-DD HH:MM`,
