@@ -2477,6 +2477,7 @@
                         "call_classification": "scheduling",
                         "summary": "Booked a wellness exam",
                         "customer_sentiment": "happy",
+                        "satisfaction_rating": 4,
                         "outcome": "appointment_booked",
                         "booked": true,
                         "booking_intent": true,
@@ -2602,6 +2603,7 @@
                     "call_classification": "scheduling",
                     "summary": "Booked a wellness exam",
                     "customer_sentiment": "happy",
+                    "satisfaction_rating": 4,
                     "outcome": "appointment_booked",
                     "booked": true,
                     "booking_intent": true,
@@ -4635,7 +4637,16 @@
               "unknown",
               null
             ],
-            "description": "Caller sentiment detected from the transcript"
+            "description": "The AI's read of the caller's mood from the transcript; null until the call is analyzed"
+          },
+          "satisfaction_rating": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 5,
+            "description": "The caller's own 1\u20135 answer to the end-of-call survey (5 = very satisfied), said out loud or pressed on the keypad. Null when the caller wasn't asked or didn't answer with a number"
           },
           "outcome": {
             "type": [
